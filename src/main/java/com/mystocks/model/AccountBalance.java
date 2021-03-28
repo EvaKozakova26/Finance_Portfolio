@@ -11,11 +11,21 @@ public class AccountBalance {
 
 	private String btc;
 
+	private String userId;
+
 	public String getBtc() {
 		return btc;
 	}
 
 	public void setBtc(String btc) {
 		this.btc = btc;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 }

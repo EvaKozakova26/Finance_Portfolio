@@ -6,9 +6,7 @@ import com.mystocks.service.ExchangeRateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -18,6 +16,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class StockController {
@@ -42,9 +41,9 @@ public class StockController {
 		buildRetrofit();
 	}
 
-	@GetMapping("/btc")
+	@GetMapping("/btc/{userId}")
 	@CrossOrigin
-	public BtcInfoData getBtcPrice() {
+	public BtcInfoData getBtcPrice(@PathVariable("userId") String userId) {
 		LOGGER.info("getBtcPrice has started");
 
 		Response<BtcInfoDto> response = null;
@@ -55,14 +54,17 @@ public class StockController {
 			e.printStackTrace();
 		}
 
-		return fillBtcData(response != null ? response.body() : new BtcInfoDto());
+		return fillBtcData(response != null ? response.body() : new BtcInfoDto(), userId);
 	}
 
-	private BtcInfoData fillBtcData(BtcInfoDto body) {
+	private BtcInfoData fillBtcData(BtcInfoDto body, String userId) {
 		BtcInfoData btcInfoData = new BtcInfoData();
 
 		List<AccountBalance> all = accBalanceRepository.findAll();
-		AccountBalance accountBalance = all.get(0);
+		Optional<AccountBalance> balance = all.stream()
+				.filter(accountBalance -> accountBalance.getUserId().equals(userId))
+				.findFirst();
+		AccountBalance accountBalance = balance.orElseGet(AccountBalance::new);
 
 		btcInfoData.setBtcBalance(accountBalance.getBtc());
 		String rate = body != null ? body.getBpi().getUSD().getRate() : null;
