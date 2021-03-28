@@ -67,11 +67,11 @@ public class StockController {
 	private BtcInfoData fillBtcData(BtcInfoDto body, String userId) {
 		BtcInfoData btcInfoData = new BtcInfoData();
 
-		List<AccountBalance> all = accBalanceRepository.findAll();
-		Optional<AccountBalance> balance = all.stream()
+		List<AccountBalance> allAccountBalances = accBalanceRepository.findAll();
+		Optional<AccountBalance> foundBalance = allAccountBalances.stream()
 				.filter(accountBalance -> accountBalance.getUserId().equals(userId))
 				.findFirst();
-		AccountBalance accountBalance = balance.orElseGet(AccountBalance::new);
+		AccountBalance accountBalance = foundBalance.orElseGet(AccountBalance::new);
 
 		btcInfoData.setBtcBalance(accountBalance.getBtc());
 		String rate = body != null ? body.getBpi().getUSD().getRate() : null;
@@ -84,8 +84,8 @@ public class StockController {
 		BigDecimal v1 = new BigDecimal(accountBalance.getBtc());
 		BigDecimal v2 = new BigDecimal(normalizedRate);
 		BigDecimal result = v1.multiply(v2);
-		BigDecimal bigDecimal = result.setScale(3, RoundingMode.HALF_UP);
-		btcInfoData.setAccBalance(String.valueOf(bigDecimal));
+		BigDecimal finalBalance = result.setScale(3, RoundingMode.HALF_UP);
+		btcInfoData.setAccBalance(String.valueOf(finalBalance));
 
 		return btcInfoData;
 	}
