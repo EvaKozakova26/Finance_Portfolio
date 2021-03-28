@@ -3,7 +3,6 @@ package com.mystocks.controller;
 import com.mystocks.UrlReader;
 import com.mystocks.model.ExchangeRateRaw;
 import com.mystocks.service.ExchangeRateService;
-import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +24,11 @@ public class StockController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
 
-	// TODO: 28.03.2021 tahat z databaze
-	public static final String BTC_BALANCE = "0.00752266";
-
 	@Autowired
 	private ExchangeRateService exchangeRateService;
+
+	@Autowired
+	private AccountBalanceRepository accBalanceRepository;
 
 	private CryptoService cryptoService;
 
@@ -61,7 +60,11 @@ public class StockController {
 
 	private BtcInfoData fillBtcData(BtcInfoDto body) {
 		BtcInfoData btcInfoData = new BtcInfoData();
-		btcInfoData.setBtcBalance(BTC_BALANCE);
+
+		List<AccountBalance> all = accBalanceRepository.findAll();
+		AccountBalance accountBalance = all.get(0);
+
+		btcInfoData.setBtcBalance(accountBalance.getBtc());
 		String rate = body != null ? body.getBpi().getUSD().getRate() : null;
 
 		String normalizedRate = "0";
@@ -69,7 +72,7 @@ public class StockController {
 			normalizedRate = rate.replaceAll(",","");
 		}
 		btcInfoData.setPriceInDollars(rate);
-		BigDecimal v1 = new BigDecimal(BTC_BALANCE);
+		BigDecimal v1 = new BigDecimal(accountBalance.getBtc());
 		BigDecimal v2 = new BigDecimal(normalizedRate);
 		BigDecimal result = v1.multiply(v2);
 		BigDecimal bigDecimal = result.setScale(3, RoundingMode.HALF_UP);
