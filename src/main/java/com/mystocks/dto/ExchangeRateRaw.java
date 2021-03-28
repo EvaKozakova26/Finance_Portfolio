@@ -1,4 +1,4 @@
-package com.mystocks.model;
+package com.mystocks.dto;
 
 import com.opencsv.bean.CsvBindByPosition;
 
