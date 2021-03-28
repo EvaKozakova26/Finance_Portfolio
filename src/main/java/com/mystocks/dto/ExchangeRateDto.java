@@ -39,7 +39,7 @@ public class ExchangeRateRaw {
 
 	// TODO: 01.11.2020 prelozit pocet zobchodovanych c.p.
 	/**
-	 * pocet zobchodovannych cennych papiru
+	 * pocet zobchodovannych cennych papiruplu
 	 */
 	@CsvBindByPosition(position = 8)
 	private String dayCount;
