@@ -1,6 +1,6 @@
 package com.mystocks.service;
 
-import com.mystocks.model.ExchangeRateRaw;
+import com.mystocks.dto.ExchangeRateRaw;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

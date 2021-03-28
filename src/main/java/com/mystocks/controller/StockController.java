@@ -1,7 +1,14 @@
 package com.mystocks.controller;
 
-import com.mystocks.UrlReader;
-import com.mystocks.model.ExchangeRateRaw;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mystocks.configuration.ApiConfiguration;
+import com.mystocks.dto.BtcInfoData;
+import com.mystocks.dto.BtcInfoDto;
+import com.mystocks.dto.ExchangeRateRaw;
+import com.mystocks.model.AccountBalance;
+import com.mystocks.repository.AccountBalanceRepository;
+import com.mystocks.service.CryptoService;
 import com.mystocks.service.ExchangeRateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +39,7 @@ public class StockController {
 	private CryptoService cryptoService;
 
 	@GetMapping("/exchangeRate")
-	public List<ExchangeRate> getExchangeRate() {
+	public List<ExchangeRateRaw> getExchangeRate() {
 		LOGGER.info("getExchangeRate has started");
 		return exchangeRateService.download();
 	}

@@ -2,7 +2,7 @@ package com.mystocks;
 
 
 import com.mystocks.constants.ApiConstants;
-import com.mystocks.model.ExchangeRateRaw;
+import com.mystocks.dto.ExchangeRateRaw;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

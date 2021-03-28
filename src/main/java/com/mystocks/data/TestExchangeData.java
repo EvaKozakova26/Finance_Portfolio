@@ -1,6 +1,6 @@
 package com.mystocks.data;
 
-import com.mystocks.model.ExchangeRateRaw;
+import com.mystocks.dto.ExchangeRateRaw;
 
 import java.util.ArrayList;
 import java.util.List;

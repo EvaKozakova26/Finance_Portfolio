@@ -1,7 +1,7 @@
 package com.mystocks.service;
 
 import com.mystocks.UrlReader;
-import com.mystocks.model.ExchangeRateRaw;
+import com.mystocks.dto.ExchangeRateRaw;
 import com.mystocks.model.Test;
 import com.mystocks.repository.TestRepository;
 import org.slf4j.Logger;
