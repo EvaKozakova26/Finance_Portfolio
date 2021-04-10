@@ -8,6 +8,7 @@ import com.mystocks.dto.BtcInfoDto;
 import com.mystocks.dto.ExchangeRateRaw;
 import com.mystocks.model.AccountBalance;
 import com.mystocks.repository.AccountBalanceRepository;
+import com.mystocks.service.BtcService;
 import com.mystocks.service.CryptoService;
 import com.mystocks.service.ExchangeRateService;
 import org.slf4j.Logger;
@@ -20,23 +21,23 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class StockController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
 
-	@Autowired
 	private ExchangeRateService exchangeRateService;
+	private BtcService btcService;
+	private CryptoService cryptoService;
 
 	@Autowired
-	private AccountBalanceRepository accBalanceRepository;
-
-	private CryptoService cryptoService;
+	public StockController(ExchangeRateService exchangeRateService, BtcService btcService) {
+		this.exchangeRateService = exchangeRateService;
+		this.btcService = btcService;
+		buildRetrofit();
+	}
 
 	@GetMapping("/exchangeRate")
 	public List<ExchangeRateRaw> getExchangeRate() {
@@ -44,14 +45,10 @@ public class StockController {
 		return exchangeRateService.download();
 	}
 
-	public StockController() {
-		buildRetrofit();
-	}
-
 	@GetMapping("/btc/{userId}")
 	@CrossOrigin
 	public BtcInfoData getBtcPrice(@PathVariable("userId") String userId) {
-		LOGGER.info("getBtcPrice has started");
+		LOGGER.info("getBtcPrice has started for user {}", userId);
 
 		Response<BtcInfoDto> response = null;
 		Call<BtcInfoDto> retrofitCall = cryptoService.getBtcPriceNow();
@@ -61,33 +58,7 @@ public class StockController {
 			e.printStackTrace();
 		}
 
-		return fillBtcData(response != null ? response.body() : new BtcInfoDto(), userId);
-	}
-
-	private BtcInfoData fillBtcData(BtcInfoDto body, String userId) {
-		BtcInfoData btcInfoData = new BtcInfoData();
-
-		List<AccountBalance> allAccountBalances = accBalanceRepository.findAll();
-		Optional<AccountBalance> foundBalance = allAccountBalances.stream()
-				.filter(accountBalance -> accountBalance.getUserId().equals(userId))
-				.findFirst();
-		AccountBalance accountBalance = foundBalance.orElseGet(AccountBalance::new);
-
-		btcInfoData.setBtcBalance(accountBalance.getBtc());
-		String rate = body != null ? body.getBpi().getUSD().getRate() : null;
-
-		String normalizedRate = "0";
-		if (rate != null) {
-			normalizedRate = rate.replaceAll(",","");
-		}
-		btcInfoData.setPriceInDollars(rate);
-		BigDecimal v1 = new BigDecimal(accountBalance.getBtc());
-		BigDecimal v2 = new BigDecimal(normalizedRate);
-		BigDecimal result = v1.multiply(v2);
-		BigDecimal finalBalance = result.setScale(3, RoundingMode.HALF_UP);
-		btcInfoData.setAccBalance(String.valueOf(finalBalance));
-
-		return btcInfoData;
+		return btcService.processBtcData(response != null ? response.body() : new BtcInfoDto(), userId);
 	}
 
 	private void buildRetrofit() {
