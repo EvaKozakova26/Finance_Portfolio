@@ -6,7 +6,6 @@ import com.mystocks.configuration.ApiConfiguration;
 import com.mystocks.dto.BtcInfoData;
 import com.mystocks.dto.BtcInfoDto;
 import com.mystocks.dto.ExchangeRateRaw;
-import com.mystocks.model.AccountBalance;
 import com.mystocks.repository.AccountBalanceRepository;
 import com.mystocks.service.BtcService;
 import com.mystocks.service.CryptoService;
@@ -55,6 +54,7 @@ public class StockController {
 		try {
 			response =  retrofitCall.execute();
 		} catch (IOException e) {
+			// TODO: 10.04.2021 exception mapper
 			e.printStackTrace();
 		}
 

@@ -3,8 +3,7 @@ package com.mystocks.dto;
 public class Bpi {
 
 	private USD USD;
-	private GBP GBP;
-	private EUR EUR;
+	private CZK CZK;
 
 	public com.mystocks.dto.USD getUSD() {
 		return USD;
@@ -14,20 +13,12 @@ public class Bpi {
 		this.USD = USD;
 	}
 
-	public com.mystocks.dto.GBP getGBP() {
-		return GBP;
+	public com.mystocks.dto.CZK getCZK() {
+		return CZK;
 	}
 
-	public void setGBP(com.mystocks.dto.GBP GBP) {
-		this.GBP = GBP;
-	}
-
-	public com.mystocks.dto.EUR getEUR() {
-		return EUR;
-	}
-
-	public void setEUR(com.mystocks.dto.EUR EUR) {
-		this.EUR = EUR;
+	public void setCZK(com.mystocks.dto.CZK CZK) {
+		this.CZK = CZK;
 	}
 }
 

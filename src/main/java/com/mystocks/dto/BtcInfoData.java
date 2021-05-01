@@ -1,20 +1,12 @@
 package com.mystocks.dto;
 
+import java.util.List;
+
 public class BtcInfoData {
 
-	private String priceInDollars;
+	List<BtcBalance> btcRates;
 
 	private String btcBalance;
-
-	private String accBalance;
-
-	public String getPriceInDollars() {
-		return priceInDollars;
-	}
-
-	public void setPriceInDollars(String priceInDollars) {
-		this.priceInDollars = priceInDollars;
-	}
 
 	public String getBtcBalance() {
 		return btcBalance;
@@ -24,11 +16,11 @@ public class BtcInfoData {
 		this.btcBalance = btcBalance;
 	}
 
-	public String getAccBalance() {
-		return accBalance;
+	public List<BtcBalance> getBtcRates() {
+		return btcRates;
 	}
 
-	public void setAccBalance(String accBalance) {
-		this.accBalance = accBalance;
+	public void setBtcRates(List<BtcBalance> btcRates) {
+		this.btcRates = btcRates;
 	}
 }
