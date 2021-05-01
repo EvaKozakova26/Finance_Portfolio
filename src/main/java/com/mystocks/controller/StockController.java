@@ -6,7 +6,6 @@ import com.mystocks.configuration.ApiConfiguration;
 import com.mystocks.dto.BtcInfoData;
 import com.mystocks.dto.BtcInfoDto;
 import com.mystocks.dto.ExchangeRateRaw;
-import com.mystocks.repository.AccountBalanceRepository;
 import com.mystocks.service.BtcService;
 import com.mystocks.service.CryptoService;
 import com.mystocks.service.ExchangeRateService;
@@ -27,8 +26,8 @@ public class StockController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
 
-	private ExchangeRateService exchangeRateService;
-	private BtcService btcService;
+	private final ExchangeRateService exchangeRateService;
+	private final BtcService btcService;
 	private CryptoService cryptoService;
 
 	@Autowired
