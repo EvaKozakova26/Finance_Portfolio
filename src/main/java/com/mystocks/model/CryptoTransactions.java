@@ -20,6 +20,8 @@ public class CryptoTransactions {
 
 	private Date date;
 
+	private int buyInCrowns;
+
 	public String getUserId() {
 		return userId;
 	}
@@ -50,5 +52,13 @@ public class CryptoTransactions {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public int getBuyInCrowns() {
+		return buyInCrowns;
+	}
+
+	public void setBuyInCrowns(int buyInCrowns) {
+		this.buyInCrowns = buyInCrowns;
 	}
 }

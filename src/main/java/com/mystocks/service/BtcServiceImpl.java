@@ -10,6 +10,7 @@ import com.mystocks.repository.CryptoTransactionsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.proxy.InterfaceMaker;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -46,6 +47,7 @@ public class BtcServiceImpl implements BtcService{
 			totalAmount = getTotalAmount(allByUserId);
 		}
 
+		btcInfoData.setInvestedInCrowns(String.valueOf(getInvestedCrowns(allByUserId)));
 		btcInfoData.setBtcBalance(String.valueOf(totalAmount));
 
 		List<BtcBalance> btcRates = new ArrayList<>();
@@ -62,6 +64,13 @@ public class BtcServiceImpl implements BtcService{
 
 		LOGGER.info("processBtcData has ended for user {}", userId);
 		return btcInfoData;
+	}
+
+	private Integer getInvestedCrowns(List<CryptoTransactions> allByUserId) {
+		return allByUserId.stream()
+				.filter(ct -> ct.getType().equals("btc"))
+				.map(CryptoTransactions::getBuyInCrowns)
+				.reduce(0, Integer::sum);
 	}
 
 	private BigDecimal getTotalAmount(List<CryptoTransactions> allByUserId) {

@@ -8,6 +8,8 @@ public class BtcInfoData {
 
 	private String btcBalance;
 
+	private String investedInCrowns;
+
 	public String getBtcBalance() {
 		return btcBalance;
 	}
@@ -22,5 +24,13 @@ public class BtcInfoData {
 
 	public void setBtcRates(List<BtcBalance> btcRates) {
 		this.btcRates = btcRates;
+	}
+
+	public String getInvestedInCrowns() {
+		return investedInCrowns;
+	}
+
+	public void setInvestedInCrowns(String investedInCrowns) {
+		this.investedInCrowns = investedInCrowns;
 	}
 }
