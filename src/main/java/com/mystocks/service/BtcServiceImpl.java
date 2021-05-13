@@ -11,10 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.proxy.InterfaceMaker;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +37,28 @@ public class BtcServiceImpl implements BtcService{
 
 	@Autowired
 	private CryptoTransactionsRepository cryptoTransactionsRepository;
+
+	@Override
+	public List<CryptoTransactionDto> getAllTransactions(String userId) {
+		List<CryptoTransactions> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
+
+		LOGGER.debug("mapping all transactions has started");
+
+		return allByUserId.stream()
+				.map(this::mapTransaction)
+				.collect(Collectors.toList());
+	}
+
+	private CryptoTransactionDto mapTransaction(CryptoTransactions cryptoTransaction) {
+		CryptoTransactionDto transactionDto = new CryptoTransactionDto();
+		transactionDto.setAmountBtc(cryptoTransaction.getAmount().toString());
+		transactionDto.setType(cryptoTransaction.getType());
+		transactionDto.setBuySellValue(String.valueOf(cryptoTransaction.getBuyInCrowns()));
+		DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+		String strDate = dateFormat.format(cryptoTransaction.getDate());
+		transactionDto.setDate(strDate);
+		return transactionDto;
+	}
 
 	@Override
 	public BtcInfoData processBtcData(BtcInfoDto btcInfoDto, String userId) {

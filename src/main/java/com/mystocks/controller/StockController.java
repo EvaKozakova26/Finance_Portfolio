@@ -3,9 +3,7 @@ package com.mystocks.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mystocks.configuration.ApiConfiguration;
-import com.mystocks.dto.BtcInfoData;
-import com.mystocks.dto.BtcInfoDto;
-import com.mystocks.dto.ExchangeRateRaw;
+import com.mystocks.dto.*;
 import com.mystocks.service.BtcService;
 import com.mystocks.service.CryptoService;
 import com.mystocks.service.ExchangeRateService;
@@ -41,6 +39,18 @@ public class StockController {
 	public List<ExchangeRateRaw> getExchangeRate() {
 		LOGGER.info("getExchangeRate has started");
 		return exchangeRateService.download();
+	}
+
+	@GetMapping("/all/{userId}")
+	@CrossOrigin
+	public CryptoTransactionListEntity getAllTransactions(@PathVariable("userId") String userId) {
+		LOGGER.info("getAllTransactions has started for user {}", userId);
+
+		CryptoTransactionListEntity cryptoTransactionListEntity = new CryptoTransactionListEntity();
+		cryptoTransactionListEntity.setCryptoTransactions(btcService.getAllTransactions(userId));
+
+		LOGGER.info("getAllTransactions has started ended with value {}", cryptoTransactionListEntity);
+		return cryptoTransactionListEntity;
 	}
 
 	@GetMapping("/btc/{userId}")
