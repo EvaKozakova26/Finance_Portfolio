@@ -15,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -113,7 +114,9 @@ public class BtcServiceImpl implements BtcService{
 		String normalizedRate = DEFAULT_RATE;
 		if (rate != null) {
 			normalizedRate = normalizeRate(rate);
+			rate = rate.substring(0, rate.lastIndexOf("."));
 		}
+
 		btcBalance.setPrice(rate);
 		btcBalance.setAccBalance(String.valueOf(getFinalBalance(totalAmount, normalizedRate)));
 		return btcBalance;
@@ -134,7 +137,7 @@ public class BtcServiceImpl implements BtcService{
 	private BigDecimal getFinalBalance(BigDecimal totalAmount, String normalizedRate) {
 		BigDecimal v2 = new BigDecimal(normalizedRate);
 		BigDecimal result = totalAmount.multiply(v2);
-		return result.setScale(1, RoundingMode.HALF_UP);
+		return result.setScale(0, RoundingMode.HALF_UP);
 	}
 
 
