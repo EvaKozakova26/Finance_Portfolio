@@ -4,7 +4,6 @@ import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.dto.BtcBalance;
 import com.mystocks.dto.BtcInfoDto;
 import com.mystocks.model.CryptoTransactions;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

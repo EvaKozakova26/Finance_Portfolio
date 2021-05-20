@@ -41,6 +41,13 @@ public class StockController {
 		return exchangeRateService.download();
 	}
 
+	@PostMapping("/crypto/create/{userId}")
+	@CrossOrigin
+	public Void createCryptoTransaction(@RequestBody CryptoTransactionCreateEntity ctce,  @PathVariable("userId") String userId) {
+		LOGGER.info("createCryptoTransaction has started for user {}", userId);
+		return null;
+	}
+
 	@GetMapping("/all/{userId}")
 	@CrossOrigin
 	public CryptoTransactionListEntity getAllTransactions(@PathVariable("userId") String userId) {
