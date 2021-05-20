@@ -20,7 +20,13 @@ public class CryptoTransactions {
 
 	private Date date;
 
-	private int buyInCrowns;
+	private BigDecimal transactionValueInCrowns;
+
+	private BigDecimal stockPriceInDollars;
+
+	private BigDecimal stockPriceInCrowns;
+
+	private BigDecimal transactionValueInDollars;
 
 	public String getUserId() {
 		return userId;
@@ -54,11 +60,35 @@ public class CryptoTransactions {
 		this.date = date;
 	}
 
-	public int getBuyInCrowns() {
-		return buyInCrowns;
+	public BigDecimal getTransactionValueInCrowns() {
+		return transactionValueInCrowns;
 	}
 
-	public void setBuyInCrowns(int buyInCrowns) {
-		this.buyInCrowns = buyInCrowns;
+	public void setTransactionValueInCrowns(BigDecimal transactionValueInCrowns) {
+		this.transactionValueInCrowns = transactionValueInCrowns;
+	}
+
+	public BigDecimal getStockPriceInDollars() {
+		return stockPriceInDollars;
+	}
+
+	public void setStockPriceInDollars(BigDecimal stockPriceInDollars) {
+		this.stockPriceInDollars = stockPriceInDollars;
+	}
+
+	public BigDecimal getStockPriceInCrowns() {
+		return stockPriceInCrowns;
+	}
+
+	public void setStockPriceInCrowns(BigDecimal stockPriceInCrowns) {
+		this.stockPriceInCrowns = stockPriceInCrowns;
+	}
+
+	public BigDecimal getTransactionValueInDollars() {
+		return transactionValueInDollars;
+	}
+
+	public void setTransactionValueInDollars(BigDecimal transactionValueInDollars) {
+		this.transactionValueInDollars = transactionValueInDollars;
 	}
 }

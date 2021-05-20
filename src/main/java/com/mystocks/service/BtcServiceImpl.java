@@ -3,32 +3,27 @@ package com.mystocks.service;
 import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.controller.StockController;
 import com.mystocks.dto.*;
-import com.mystocks.model.AccountBalance;
 import com.mystocks.model.CryptoTransactions;
 import com.mystocks.repository.AccountBalanceRepository;
 import com.mystocks.repository.CryptoTransactionsRepository;
+import com.mystocks.utils.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.proxy.InterfaceMaker;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class BtcServiceImpl implements BtcService{
 
-	public static final String REGEX = ",";
 	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
 
 	private static final String DEFAULT_RATE = "0";
@@ -40,21 +35,36 @@ public class BtcServiceImpl implements BtcService{
 	private CryptoTransactionsRepository cryptoTransactionsRepository;
 
 	@Override
-	public List<CryptoTransactionDto> getAllTransactions(String userId) {
+	public CryptoTransactionListEntity getAllTransactions(String userId) {
 		List<CryptoTransactions> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 
-		LOGGER.debug("mapping all transactions has started");
+		CryptoTransactionListEntity cryptoTransactionListEntity = new CryptoTransactionListEntity();
 
-		return allByUserId.stream()
+		Map<BigDecimal, BigDecimal> transactionValuesDollarsMap = allByUserId.stream()
+				.collect(Collectors.toMap(CryptoTransactions::getStockPriceInDollars, CryptoTransactions::getTransactionValueInDollars));
+
+		Map<BigDecimal, BigDecimal> transactionValuesCrownsMap = allByUserId.stream()
+				.collect(Collectors.toMap(CryptoTransactions::getStockPriceInCrowns, CryptoTransactions::getTransactionValueInCrowns));
+
+		List<CryptoTransactionDto> transactionDtos = allByUserId.stream()
 				.map(this::mapTransaction)
 				.collect(Collectors.toList());
+
+
+
+		cryptoTransactionListEntity.setCryptoTransactions(transactionDtos);
+		cryptoTransactionListEntity.setAverageTransactionValueInDollars(MathUtils.weightedAverage(transactionValuesDollarsMap));
+		cryptoTransactionListEntity.setAverageTransactionValueInCrowns(MathUtils.weightedAverage(transactionValuesCrownsMap));
+
+		return cryptoTransactionListEntity;
 	}
 
 	private CryptoTransactionDto mapTransaction(CryptoTransactions cryptoTransaction) {
+		LOGGER.debug("mapping all transactions has started");
 		CryptoTransactionDto transactionDto = new CryptoTransactionDto();
 		transactionDto.setAmountBtc(cryptoTransaction.getAmount().toString());
 		transactionDto.setType(cryptoTransaction.getType());
-		transactionDto.setBuySellValue(String.valueOf(cryptoTransaction.getBuyInCrowns()));
+		transactionDto.setBuySellValue(String.valueOf(cryptoTransaction.getTransactionValueInCrowns()));
 		DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 		String strDate = dateFormat.format(cryptoTransaction.getDate());
 		transactionDto.setDate(strDate);
@@ -92,11 +102,11 @@ public class BtcServiceImpl implements BtcService{
 		return btcInfoData;
 	}
 
-	private Integer getInvestedCrowns(List<CryptoTransactions> allByUserId) {
+	private BigDecimal getInvestedCrowns(List<CryptoTransactions> allByUserId) {
 		return allByUserId.stream()
 				.filter(ct -> ct.getType().equals("btc"))
-				.map(CryptoTransactions::getBuyInCrowns)
-				.reduce(0, Integer::sum);
+				.map(CryptoTransactions::getTransactionValueInCrowns)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 
 	private BigDecimal getTotalAmount(List<CryptoTransactions> allByUserId) {

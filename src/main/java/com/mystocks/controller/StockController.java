@@ -45,12 +45,7 @@ public class StockController {
 	@CrossOrigin
 	public CryptoTransactionListEntity getAllTransactions(@PathVariable("userId") String userId) {
 		LOGGER.info("getAllTransactions has started for user {}", userId);
-
-		CryptoTransactionListEntity cryptoTransactionListEntity = new CryptoTransactionListEntity();
-		cryptoTransactionListEntity.setCryptoTransactions(btcService.getAllTransactions(userId));
-
-		LOGGER.info("getAllTransactions has started ended with value {}", cryptoTransactionListEntity);
-		return cryptoTransactionListEntity;
+		return btcService.getAllTransactions(userId);
 	}
 
 	@GetMapping("/btc/{userId}")
