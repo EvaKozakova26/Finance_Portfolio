@@ -3,6 +3,7 @@ package com.mystocks.service;
 import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.controller.StockController;
 import com.mystocks.dto.*;
+import com.mystocks.helper.BitcoinDataHelper;
 import com.mystocks.model.CryptoTransactions;
 import com.mystocks.repository.AccountBalanceRepository;
 import com.mystocks.repository.CryptoTransactionsRepository;
@@ -10,6 +11,7 @@ import com.mystocks.utils.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.internal.Function;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -26,13 +28,14 @@ public class BtcServiceImpl implements BtcService{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
 
-	private static final String DEFAULT_RATE = "0";
+	final private CryptoTransactionsRepository cryptoTransactionsRepository;
+	final private BitcoinDataHelper bitcoinDataHelper;
 
 	@Autowired
-	private AccountBalanceRepository accountBalanceRepository;
-
-	@Autowired
-	private CryptoTransactionsRepository cryptoTransactionsRepository;
+	public BtcServiceImpl(CryptoTransactionsRepository cryptoTransactionsRepository) {
+		this.cryptoTransactionsRepository = cryptoTransactionsRepository;
+		this.bitcoinDataHelper = new BitcoinDataHelper();
+	}
 
 	@Override
 	public CryptoTransactionListEntity getAllTransactions(String userId) {
@@ -49,8 +52,6 @@ public class BtcServiceImpl implements BtcService{
 		List<CryptoTransactionDto> transactionDtos = allByUserId.stream()
 				.map(this::mapTransaction)
 				.collect(Collectors.toList());
-
-
 
 		cryptoTransactionListEntity.setCryptoTransactions(transactionDtos);
 		cryptoTransactionListEntity.setAverageTransactionValueInDollars(MathUtils.weightedAverage(transactionValuesDollarsMap));
@@ -80,20 +81,20 @@ public class BtcServiceImpl implements BtcService{
 		List<CryptoTransactions> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 		BigDecimal totalAmount = BigDecimal.ZERO;
 		if (!allByUserId.isEmpty()) {
-			totalAmount = getTotalAmount(allByUserId);
+			totalAmount = bitcoinDataHelper.getTotalAmount(allByUserId);
 		}
 
-		btcInfoData.setInvestedInCrowns(String.valueOf(getInvestedCrowns(allByUserId)));
+		btcInfoData.setInvestedInCrowns(String.valueOf(bitcoinDataHelper.getInvestedCrowns(allByUserId)));
 		btcInfoData.setBtcBalance(String.valueOf(totalAmount));
 
 		List<BtcBalance> btcRates = new ArrayList<>();
 
 		// USD
-		BtcBalance btcBalanceUSD = getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.USD);
+		BtcBalance btcBalanceUSD = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.USD);
 		btcRates.add(btcBalanceUSD);
 
 		//CZK
-		BtcBalance btcBalanceCZK = getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.CZK);
+		BtcBalance btcBalanceCZK = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.CZK);
 		btcRates.add(btcBalanceCZK);
 
 		btcInfoData.setBtcRates(btcRates);
@@ -101,54 +102,5 @@ public class BtcServiceImpl implements BtcService{
 		LOGGER.info("processBtcData has ended for user {}", userId);
 		return btcInfoData;
 	}
-
-	private BigDecimal getInvestedCrowns(List<CryptoTransactions> allByUserId) {
-		return allByUserId.stream()
-				.filter(ct -> ct.getType().equals("btc"))
-				.map(CryptoTransactions::getTransactionValueInCrowns)
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-	}
-
-	private BigDecimal getTotalAmount(List<CryptoTransactions> allByUserId) {
-		return allByUserId.stream()
-				.filter(ct -> ct.getType().equals("btc"))
-				.map(CryptoTransactions::getAmount)
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-	}
-
-	private BtcBalance getBtcBalance(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) {
-		BtcBalance btcBalance = new BtcBalance();
-		btcBalance.setCurrency(currency.name());
-		String rate = btcInfoDto != null ? getRateByCurrency(btcInfoDto, currency) : null;
-
-		String normalizedRate = DEFAULT_RATE;
-		if (rate != null) {
-			normalizedRate = normalizeRate(rate);
-			rate = rate.substring(0, rate.lastIndexOf("."));
-		}
-
-		btcBalance.setPrice(rate);
-		btcBalance.setAccBalance(String.valueOf(getFinalBalance(totalAmount, normalizedRate)));
-		return btcBalance;
-	}
-
-	private String getRateByCurrency(BtcInfoDto btcInfoDto, CurrencyEnum currencyEnum) {
-		if (currencyEnum == CurrencyEnum.USD) {
-			return btcInfoDto.getBpi().getUSD().getRate();
-		} else {
-			return btcInfoDto.getBpi().getCZK().getRate();
-		}
-	}
-
-	private String normalizeRate(String rate) {
-		return rate.replaceAll(",", "");
-	}
-
-	private BigDecimal getFinalBalance(BigDecimal totalAmount, String normalizedRate) {
-		BigDecimal v2 = new BigDecimal(normalizedRate);
-		BigDecimal result = totalAmount.multiply(v2);
-		return result.setScale(0, RoundingMode.HALF_UP);
-	}
-
 
 }
