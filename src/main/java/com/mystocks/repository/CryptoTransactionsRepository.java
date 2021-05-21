@@ -1,12 +1,11 @@
 package com.mystocks.repository;
 
-import com.mystocks.model.CryptoTransactions;
+import com.mystocks.model.CryptoTransaction;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface CryptoTransactionsRepository extends MongoRepository<CryptoTransactions, String> {
+public interface CryptoTransactionsRepository extends MongoRepository<CryptoTransaction, String> {
 
-	List<CryptoTransactions> findAllByUserId(String userId);
+	List<CryptoTransaction> findAllByUserId(String userId);
 }

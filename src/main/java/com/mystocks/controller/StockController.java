@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mystocks.configuration.ApiConfiguration;
 import com.mystocks.dto.*;
-import com.mystocks.service.BtcService;
-import com.mystocks.service.CryptoService;
-import com.mystocks.service.ExchangeRateService;
+import com.mystocks.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +24,15 @@ public class StockController {
 
 	private final ExchangeRateService exchangeRateService;
 	private final BtcService btcService;
+	private final TransactionService transactionService;
 	private CryptoService cryptoService;
 
 	@Autowired
-	public StockController(ExchangeRateService exchangeRateService, BtcService btcService) {
+	public StockController(ExchangeRateService exchangeRateService, BtcService btcService, TransactionService transactionService) {
 		this.exchangeRateService = exchangeRateService;
 		this.btcService = btcService;
-		buildRetrofit();
+		this.transactionService = transactionService;
+
 	}
 
 	@GetMapping("/exchangeRate")
@@ -45,6 +45,20 @@ public class StockController {
 	@CrossOrigin
 	public Void createCryptoTransaction(@RequestBody CryptoTransactionCreateEntity ctce,  @PathVariable("userId") String userId) {
 		LOGGER.info("createCryptoTransaction has started for user {}", userId);
+		buildTransactionRetrofit();
+		Response<ForexDataDto> response = null;
+		String substring = ctce.getTransactionDate().substring(0, 10);
+		Call<ForexDataDto> retrofitCall = cryptoService.getForexData(ctce.getTransactionDate().substring(0,10));
+
+		try {
+			response =  retrofitCall.execute();
+		} catch (IOException e) {
+			// TODO: 10.04.2021 exception mapper
+			e.printStackTrace();
+		}
+
+		transactionService.createCryptoTransaction(response != null ? response.body() : new ForexDataDto(), ctce, userId);
+
 		return null;
 	}
 
@@ -60,6 +74,8 @@ public class StockController {
 	public BtcInfoData getBtcPrice(@PathVariable("userId") String userId) {
 		LOGGER.info("getBtcPrice has started for user {}", userId);
 
+		buildCryptoRetrofit();
+
 		Response<BtcInfoDto> response = null;
 		Call<BtcInfoDto> retrofitCall = cryptoService.getBtcPriceNow();
 		try {
@@ -72,12 +88,27 @@ public class StockController {
 		return btcService.processBtcData(response != null ? response.body() : new BtcInfoDto(), userId);
 	}
 
-	private void buildRetrofit() {
+	private void buildCryptoRetrofit() {
 		Gson gson = new GsonBuilder()
 				.setLenient()
 				.create();
 
-		String baseUrl = ApiConfiguration.API_BASE_URL;
+		String baseUrl = ApiConfiguration.API_COINBASE_URL;
+
+		Retrofit retrofit = new Retrofit.Builder()
+				.baseUrl(baseUrl)
+				.addConverterFactory(GsonConverterFactory.create(gson))
+				.build();
+
+		cryptoService = retrofit.create(CryptoService.class);
+	}
+
+	private void buildTransactionRetrofit() {
+		Gson gson = new GsonBuilder()
+				.setLenient()
+				.create();
+
+		String baseUrl = ApiConfiguration.API_FOREX_URL;
 
 		Retrofit retrofit = new Retrofit.Builder()
 				.baseUrl(baseUrl)

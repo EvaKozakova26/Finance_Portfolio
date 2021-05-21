@@ -3,7 +3,7 @@ package com.mystocks.helper;
 import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.dto.BtcBalance;
 import com.mystocks.dto.BtcInfoDto;
-import com.mystocks.model.CryptoTransactions;
+import com.mystocks.model.CryptoTransaction;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,10 +18,10 @@ public class BitcoinDataHelper {
 	 * @param allByUserId - all transactions by specific user
 	 * @return sum
 	 */
-	public BigDecimal getInvestedCrowns(List<CryptoTransactions> allByUserId) {
+	public BigDecimal getInvestedCrowns(List<CryptoTransaction> allByUserId) {
 		return allByUserId.stream()
 				.filter(ct -> ct.getType().equals("btc"))
-				.map(CryptoTransactions::getTransactionValueInCrowns)
+				.map(CryptoTransaction::getTransactionValueInCrowns)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 
@@ -30,10 +30,10 @@ public class BitcoinDataHelper {
 	 * @param allByUserId - all transactions by specific user
 	 * @return sum
 	 */
-	public BigDecimal getTotalAmount(List<CryptoTransactions> allByUserId) {
+	public BigDecimal getTotalAmount(List<CryptoTransaction> allByUserId) {
 		return allByUserId.stream()
 				.filter(ct -> ct.getType().equals("btc"))
-				.map(CryptoTransactions::getAmount)
+				.map(CryptoTransaction::getAmount)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Document(collection = "crypto_transactions")
-public class CryptoTransactions {
+public class CryptoTransaction {
 
 	@Id
 	private String id;

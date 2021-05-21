@@ -4,14 +4,12 @@ import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.controller.StockController;
 import com.mystocks.dto.*;
 import com.mystocks.helper.BitcoinDataHelper;
-import com.mystocks.model.CryptoTransactions;
-import com.mystocks.repository.AccountBalanceRepository;
+import com.mystocks.model.CryptoTransaction;
 import com.mystocks.repository.CryptoTransactionsRepository;
 import com.mystocks.utils.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.internal.Function;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -39,15 +37,15 @@ public class BtcServiceImpl implements BtcService{
 
 	@Override
 	public CryptoTransactionListEntity getAllTransactions(String userId) {
-		List<CryptoTransactions> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
+		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 
 		CryptoTransactionListEntity cryptoTransactionListEntity = new CryptoTransactionListEntity();
 
 		Map<BigDecimal, BigDecimal> transactionValuesDollarsMap = allByUserId.stream()
-				.collect(Collectors.toMap(CryptoTransactions::getStockPriceInDollars, CryptoTransactions::getTransactionValueInDollars));
+				.collect(Collectors.toMap(CryptoTransaction::getStockPriceInDollars, CryptoTransaction::getTransactionValueInDollars));
 
 		Map<BigDecimal, BigDecimal> transactionValuesCrownsMap = allByUserId.stream()
-				.collect(Collectors.toMap(CryptoTransactions::getStockPriceInCrowns, CryptoTransactions::getTransactionValueInCrowns));
+				.collect(Collectors.toMap(CryptoTransaction::getStockPriceInCrowns, CryptoTransaction::getTransactionValueInCrowns));
 
 		List<CryptoTransactionDto> transactionDtos = allByUserId.stream()
 				.map(this::mapTransaction)
@@ -60,12 +58,15 @@ public class BtcServiceImpl implements BtcService{
 		return cryptoTransactionListEntity;
 	}
 
-	private CryptoTransactionDto mapTransaction(CryptoTransactions cryptoTransaction) {
+	private CryptoTransactionDto mapTransaction(CryptoTransaction cryptoTransaction) {
 		LOGGER.debug("mapping all transactions has started");
 		CryptoTransactionDto transactionDto = new CryptoTransactionDto();
 		transactionDto.setAmountBtc(cryptoTransaction.getAmount().toString());
 		transactionDto.setType(cryptoTransaction.getType());
-		transactionDto.setBuySellValue(String.valueOf(cryptoTransaction.getTransactionValueInCrowns()));
+		transactionDto.setBuySellValue(String.valueOf(cryptoTransaction.getTransactionValueInCrowns().setScale(0, RoundingMode.HALF_UP)));
+		transactionDto.setBuySellValueInDollars(String.valueOf(cryptoTransaction.getTransactionValueInDollars().setScale(0, RoundingMode.HALF_UP)));
+		transactionDto.setStockPriceInCrowns(String.valueOf(cryptoTransaction.getStockPriceInCrowns().setScale(0, RoundingMode.HALF_UP)));
+		transactionDto.setStockPriceInDollars(String.valueOf(cryptoTransaction.getStockPriceInDollars().setScale(0, RoundingMode.HALF_UP)));
 		DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 		String strDate = dateFormat.format(cryptoTransaction.getDate());
 		transactionDto.setDate(strDate);
@@ -78,7 +79,7 @@ public class BtcServiceImpl implements BtcService{
 
 		BtcInfoData btcInfoData = new BtcInfoData();
 
-		List<CryptoTransactions> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
+		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 		BigDecimal totalAmount = BigDecimal.ZERO;
 		if (!allByUserId.isEmpty()) {
 			totalAmount = bitcoinDataHelper.getTotalAmount(allByUserId);
