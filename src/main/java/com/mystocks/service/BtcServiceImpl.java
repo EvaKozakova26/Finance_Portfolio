@@ -17,7 +17,7 @@ import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,7 +40,7 @@ public class BtcServiceImpl implements BtcService{
 	public CryptoTransactionListEntity getAllTransactions(String userId) {
 		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 
-		Collections.reverse(allByUserId);
+		allByUserId.sort(Comparator.comparing(CryptoTransaction::getDate).reversed());
 
 		CryptoTransactionListEntity cryptoTransactionListEntity = new CryptoTransactionListEntity();
 

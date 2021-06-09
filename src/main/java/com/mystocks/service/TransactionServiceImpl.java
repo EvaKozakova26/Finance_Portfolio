@@ -29,7 +29,7 @@ public class TransactionServiceImpl implements TransactionService{
 		cryptoTransaction.setAmount(new BigDecimal(ctce.getAmount()));
 		cryptoTransaction.setType(ctce.getAssetType());
 
-		double transactionValueInDollars = Double.parseDouble(ctce.getTransactionValue()) / forexData.getRates().getCZK();
+		double transactionValueInDollars = Double.parseDouble(ctce.getTransactionValue()) / forexData.getRates().getCZK() * forexData.getRates().getUSD();
 
 		double stockPriceInDollars = transactionValueInDollars / Double.parseDouble(ctce.getAmount());
 		double stockPriceInCrowns = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
