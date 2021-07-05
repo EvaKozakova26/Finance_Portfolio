@@ -45,7 +45,7 @@ public class StockController {
 	@CrossOrigin
 	public Void createCryptoTransaction(@RequestBody CryptoTransactionCreateEntity ctce,  @PathVariable("userId") String userId) {
 		LOGGER.info("createCryptoTransaction has started for user {}", userId);
-		buildTransactionRetrofit();
+		buildForexRetrofit();
 		Response<ForexDataDto> response = null;
 		String substring = ctce.getTransactionDate().substring(0, 10);
 		Call<ForexDataDto> retrofitCall = cryptoService.getForexData(ctce.getTransactionDate().substring(0,10));
@@ -69,10 +69,13 @@ public class StockController {
 		return btcService.getAllTransactions(userId);
 	}
 
-	@GetMapping("/btc/{userId}")
+	@GetMapping("/assets/{userId}")
 	@CrossOrigin
-	public BtcInfoData getBtcPrice(@PathVariable("userId") String userId) {
+	public AssetDataListEntity getAssetsData(@PathVariable("userId") String userId) {
+		// TODO: 05.07.2021 not onlz btc but all assets
 		LOGGER.info("getBtcPrice has started for user {}", userId);
+
+		AssetDataListEntity result = new AssetDataListEntity();
 
 		buildCryptoRetrofit();
 
@@ -85,7 +88,8 @@ public class StockController {
 			e.printStackTrace();
 		}
 
-		return btcService.processBtcData(response != null ? response.body() : new BtcInfoDto(), userId);
+		result.addAsset(btcService.processBtcData(response != null ? response.body() : new BtcInfoDto(), userId));
+		return result;
 	}
 
 	private void buildCryptoRetrofit() {
@@ -103,7 +107,7 @@ public class StockController {
 		cryptoService = retrofit.create(CryptoService.class);
 	}
 
-	private void buildTransactionRetrofit() {
+	private void buildForexRetrofit() {
 		Gson gson = new GsonBuilder()
 				.setLenient()
 				.create();

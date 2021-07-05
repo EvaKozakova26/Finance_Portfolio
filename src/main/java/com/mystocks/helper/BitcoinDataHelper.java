@@ -1,7 +1,7 @@
 package com.mystocks.helper;
 
 import com.mystocks.constants.CurrencyEnum;
-import com.mystocks.dto.BtcBalance;
+import com.mystocks.dto.AssetRate;
 import com.mystocks.dto.BtcInfoDto;
 import com.mystocks.model.CryptoTransaction;
 
@@ -44,9 +44,9 @@ public class BitcoinDataHelper {
 	 * @param currency type of currency
 	 * @return transformed info about BTC
 	 */
-	public BtcBalance getBtcBalance(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) {
-		BtcBalance btcBalance = new BtcBalance();
-		btcBalance.setCurrency(currency.name());
+	public AssetRate getBtcBalance(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) {
+		AssetRate assetRate = new AssetRate();
+		assetRate.setCurrency(currency.name());
 		String rate = btcInfoDto != null ? getRateByCurrency(btcInfoDto, currency) : null;
 
 		String normalizedRate = DEFAULT_RATE;
@@ -55,9 +55,9 @@ public class BitcoinDataHelper {
 			rate = rate.substring(0, rate.lastIndexOf("."));
 		}
 
-		btcBalance.setPrice(rate);
-		btcBalance.setAccBalance(String.valueOf(getFinalBalance(totalAmount, normalizedRate)));
-		return btcBalance;
+		assetRate.setPrice(rate);
+		assetRate.setAccBalance(String.valueOf(getFinalBalance(totalAmount, normalizedRate)));
+		return assetRate;
 	}
 
 	private String getRateByCurrency(BtcInfoDto btcInfoDto, CurrencyEnum currencyEnum) {

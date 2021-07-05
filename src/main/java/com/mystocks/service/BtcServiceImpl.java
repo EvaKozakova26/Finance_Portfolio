@@ -3,6 +3,7 @@ package com.mystocks.service;
 import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.controller.StockController;
 import com.mystocks.dto.*;
+import com.mystocks.enums.AssetType;
 import com.mystocks.helper.BitcoinDataHelper;
 import com.mystocks.model.CryptoTransaction;
 import com.mystocks.repository.CryptoTransactionsRepository;
@@ -77,10 +78,10 @@ public class BtcServiceImpl implements BtcService{
 	}
 
 	@Override
-	public BtcInfoData processBtcData(BtcInfoDto btcInfoDto, String userId) {
+	public AssetData processBtcData(BtcInfoDto btcInfoDto, String userId) {
 		LOGGER.info("processBtcData has started for user {}", userId);
 
-		BtcInfoData btcInfoData = new BtcInfoData();
+		AssetData assetData = new AssetData();
 
 		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 		BigDecimal totalAmount = BigDecimal.ZERO;
@@ -88,23 +89,24 @@ public class BtcServiceImpl implements BtcService{
 			totalAmount = bitcoinDataHelper.getTotalAmount(allByUserId);
 		}
 
-		btcInfoData.setInvestedInCrowns(String.valueOf(bitcoinDataHelper.getInvestedCrowns(allByUserId)));
-		btcInfoData.setBtcBalance(String.valueOf(totalAmount));
+		assetData.setInvestedInCrowns(String.valueOf(bitcoinDataHelper.getInvestedCrowns(allByUserId)));
+		assetData.setAssetBalance(String.valueOf(totalAmount));
 
-		List<BtcBalance> btcRates = new ArrayList<>();
+		List<AssetRate> btcRates = new ArrayList<>();
 
 		// USD
-		BtcBalance btcBalanceUSD = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.USD);
-		btcRates.add(btcBalanceUSD);
+		AssetRate assetRateUSD = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.USD);
+		btcRates.add(assetRateUSD);
 
 		//CZK
-		BtcBalance btcBalanceCZK = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.CZK);
-		btcRates.add(btcBalanceCZK);
+		AssetRate assetRateCZK = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.CZK);
+		btcRates.add(assetRateCZK);
 
-		btcInfoData.setBtcRates(btcRates);
+		assetData.setAssetBalanceList(btcRates);
 
 		LOGGER.info("processBtcData has ended for user {}", userId);
-		return btcInfoData;
+		assetData.setType(AssetType.CRYPTO);
+		return assetData;
 	}
 
 }

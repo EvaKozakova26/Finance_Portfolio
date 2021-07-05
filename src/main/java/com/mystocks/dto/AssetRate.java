@@ -1,6 +1,6 @@
 package com.mystocks.dto;
 
-public class BtcBalance {
+public class AssetRate {
 
 	private String currency;
 	private String price;
