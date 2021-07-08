@@ -8,4 +8,6 @@ import java.util.List;
 public interface CryptoTransactionsRepository extends MongoRepository<CryptoTransaction, String> {
 
 	List<CryptoTransaction> findAllByUserId(String userId);
+
+	List<CryptoTransaction> findAllByTypeAndUserId(String type, String userId);
 }

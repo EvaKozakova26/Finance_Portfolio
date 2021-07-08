@@ -4,7 +4,7 @@ import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.controller.StockController;
 import com.mystocks.dto.*;
 import com.mystocks.enums.AssetType;
-import com.mystocks.helper.BitcoinDataHelper;
+import com.mystocks.helper.AssetDataHelper;
 import com.mystocks.model.CryptoTransaction;
 import com.mystocks.repository.CryptoTransactionsRepository;
 import com.mystocks.utils.MathUtils;
@@ -29,17 +29,17 @@ public class BtcServiceImpl implements BtcService{
 	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
 
 	final private CryptoTransactionsRepository cryptoTransactionsRepository;
-	final private BitcoinDataHelper bitcoinDataHelper;
+	final private AssetDataHelper assetDataHelper;
 
 	@Autowired
 	public BtcServiceImpl(CryptoTransactionsRepository cryptoTransactionsRepository) {
 		this.cryptoTransactionsRepository = cryptoTransactionsRepository;
-		this.bitcoinDataHelper = new BitcoinDataHelper();
+		this.assetDataHelper = new AssetDataHelper();
 	}
 
 	@Override
 	public CryptoTransactionListEntity getAllTransactions(String userId) {
-		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
+		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByTypeAndUserId("btc", userId);
 
 		allByUserId.sort(Comparator.comparing(CryptoTransaction::getDate).reversed());
 
@@ -86,26 +86,27 @@ public class BtcServiceImpl implements BtcService{
 		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 		BigDecimal totalAmount = BigDecimal.ZERO;
 		if (!allByUserId.isEmpty()) {
-			totalAmount = bitcoinDataHelper.getTotalAmount(allByUserId);
+			totalAmount = assetDataHelper.getTotalAmount(allByUserId, "btc");
 		}
 
-		assetData.setInvestedInCrowns(String.valueOf(bitcoinDataHelper.getInvestedCrowns(allByUserId)));
+		assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getInvestedCrowns(allByUserId, "btc")));
 		assetData.setAssetBalance(String.valueOf(totalAmount));
 
 		List<AssetRate> btcRates = new ArrayList<>();
 
 		// USD
-		AssetRate assetRateUSD = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.USD);
+		AssetRate assetRateUSD = assetDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.USD);
 		btcRates.add(assetRateUSD);
 
 		//CZK
-		AssetRate assetRateCZK = bitcoinDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.CZK);
+		AssetRate assetRateCZK = assetDataHelper.getBtcBalance(btcInfoDto, totalAmount, CurrencyEnum.CZK);
 		btcRates.add(assetRateCZK);
 
 		assetData.setAssetBalanceList(btcRates);
 
 		LOGGER.info("processBtcData has ended for user {}", userId);
 		assetData.setType(AssetType.CRYPTO);
+		assetData.setSymbol("btc");
 		return assetData;
 	}
 

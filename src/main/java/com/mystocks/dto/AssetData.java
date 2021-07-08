@@ -8,6 +8,8 @@ public class AssetData {
 
 	AssetType type;
 
+	String symbol;
+
 	List<AssetRate> assetRateList;
 
 	private String assetBalance;
@@ -44,5 +46,13 @@ public class AssetData {
 
 	public void setType(AssetType type) {
 		this.type = type;
+	}
+
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
 }

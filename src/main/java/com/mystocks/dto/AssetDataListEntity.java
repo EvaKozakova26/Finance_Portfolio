@@ -22,4 +22,8 @@ public class AssetDataListEntity {
 	public void addAsset(AssetData assetData) {
 		this.assetData.add(assetData);
 	}
+
+	public void assAssetDataList(List<AssetData> assetData) {
+		this.assetData.addAll(assetData);
+	}
 }
