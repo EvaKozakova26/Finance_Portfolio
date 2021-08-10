@@ -8,3 +8,6 @@ Used technologies:
 - Retrofit for fetching and processing API
 - MongoDB Atlas for database
 - Automatic deploy on Heroku
+
+## Architecture
+![now](https://github.com/EvaKozakova26/Finance_Portfolio/blob/master/sources/architecture.png "Now")<br/>
