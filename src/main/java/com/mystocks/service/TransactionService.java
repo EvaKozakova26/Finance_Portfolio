@@ -6,5 +6,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface TransactionService {
 
-	void createCryptoTransaction(ForexDataDto body, CryptoTransactionCreateEntity ctce, String userId);
+	void createCryptoTransaction(CryptoTransactionCreateEntity ctce, String userId);
 }

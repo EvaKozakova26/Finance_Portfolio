@@ -11,4 +11,8 @@ public class SharesDto {
 	public void setChart(Chart chart) {
 		this.chart = chart;
 	}
+
+	public Meta getMeta() {
+		return getChart().getResult().get(0).getMeta();
+	}
 }

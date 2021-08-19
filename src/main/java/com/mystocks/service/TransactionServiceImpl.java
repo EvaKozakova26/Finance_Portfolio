@@ -1,11 +1,16 @@
 package com.mystocks.service;
 
+import com.mystocks.configuration.ApiConfiguration;
 import com.mystocks.dto.CryptoTransactionCreateEntity;
 import com.mystocks.model.CryptoTransaction;
 import com.mystocks.repository.CryptoTransactionsRepository;
+import com.mystocks.utils.RetrofitBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
 
@@ -20,8 +25,22 @@ public class TransactionServiceImpl implements TransactionService{
 	}
 
 	@Override
-	public void createCryptoTransaction(ForexDataDto forexData, CryptoTransactionCreateEntity ctce, String userId) {
+	public void createCryptoTransaction(CryptoTransactionCreateEntity ctce, String userId) {
 		CryptoTransaction cryptoTransaction = new CryptoTransaction();
+
+		Response<ForexDataDto> response = null;
+		AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_FOREX_URL);
+		Call<ForexDataDto> retrofitCall = assetApiService.getForexData(ctce.getTransactionDate().substring(0,10));
+
+		try {
+			response =  retrofitCall.execute();
+		} catch (IOException e) {
+			// TODO: 10.04.2021 exception mapper
+			e.printStackTrace();
+		}
+
+		// todo check on null
+		ForexDataDto forexData = response != null ? response.body() : new ForexDataDto();
 
 		cryptoTransaction.setUserId(userId);
 		cryptoTransaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0,10)));

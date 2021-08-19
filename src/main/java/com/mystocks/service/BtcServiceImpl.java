@@ -1,5 +1,6 @@
 package com.mystocks.service;
 
+import com.mystocks.configuration.ApiConfiguration;
 import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.dto.*;
 import com.mystocks.enums.AssetType;
@@ -7,11 +8,15 @@ import com.mystocks.helper.AssetDataHelper;
 import com.mystocks.model.CryptoTransaction;
 import com.mystocks.repository.CryptoTransactionsRepository;
 import com.mystocks.utils.MathUtils;
+import com.mystocks.utils.RetrofitBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
@@ -77,7 +82,23 @@ public class BtcServiceImpl implements BtcService{
 	}
 
 	@Override
-	public AssetData processBtcData(BtcInfoDto btcInfoDto, String userId) {
+	public AssetData processBtcData(String userId) {
+		LOGGER.info("calling getBtcPrice has started for user {}", userId);
+
+		Response<BtcInfoDto> btcResponse = null;
+		AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_COINBASE_URL);
+		Call<BtcInfoDto> retrofitCallBtc = assetApiService.getBtcPriceNow();
+
+		try {
+			btcResponse =  retrofitCallBtc.execute();
+		} catch (IOException e) {
+			// TODO: 10.04.2021 exception mapper
+			e.printStackTrace();
+		}
+		return processBtcData(btcResponse != null ? btcResponse.body() : new BtcInfoDto(), userId);
+	}
+
+	private AssetData processBtcData(BtcInfoDto btcInfoDto, String userId) {
 		LOGGER.info("processBtcData has started for user {}", userId);
 
 		AssetData assetData = new AssetData();
@@ -102,11 +123,10 @@ public class BtcServiceImpl implements BtcService{
 		btcRates.add(assetRateCZK);
 
 		assetData.setAssetBalanceList(btcRates);
-
-		LOGGER.info("processBtcData has ended for user {}", userId);
 		assetData.setType(AssetType.CRYPTO);
 		assetData.setSymbol("btc");
+
+		LOGGER.info("processBtcData has ended for user {}", userId);
 		return assetData;
 	}
-
 }
