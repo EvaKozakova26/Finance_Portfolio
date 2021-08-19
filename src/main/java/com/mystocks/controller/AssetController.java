@@ -1,12 +1,11 @@
 package com.mystocks.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mystocks.configuration.ApiConfiguration;
 import com.mystocks.dto.*;
 import com.mystocks.dto.yahoo.SharesDto;
 import com.mystocks.model.CryptoTransaction;
 import com.mystocks.service.*;
+import com.mystocks.utils.RetrofitBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,10 +21,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-public class StockController {
+public class AssetController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
 
+	// todo zapouzdrit
 	private final ExchangeRateService exchangeRateService;
 	private final BtcService btcService;
 	private final TransactionService transactionService;
@@ -34,7 +33,7 @@ public class StockController {
 	private AssetApiService assetApiService;
 
 	@Autowired
-	public StockController(ExchangeRateService exchangeRateService, BtcService btcService, TransactionService transactionService, SharesService sharesService) {
+	public AssetController(ExchangeRateService exchangeRateService, BtcService btcService, TransactionService transactionService, SharesService sharesService) {
 		this.exchangeRateService = exchangeRateService;
 		this.btcService = btcService;
 		this.transactionService = transactionService;
@@ -51,7 +50,9 @@ public class StockController {
 	@CrossOrigin
 	public Void createCryptoTransaction(@RequestBody CryptoTransactionCreateEntity ctce,  @PathVariable("userId") String userId) {
 		LOGGER.info("createCryptoTransaction has started for user {}", userId);
-		buildForexRetrofit();
+		Retrofit retrofit = RetrofitBuilder.buildRetrofit(ApiConfiguration.API_FOREX_URL);
+		assetApiService = retrofit.create(AssetApiService.class);
+
 		Response<ForexDataDto> response = null;
 		String substring = ctce.getTransactionDate().substring(0, 10);
 		Call<ForexDataDto> retrofitCall = assetApiService.getForexData(ctce.getTransactionDate().substring(0,10));
@@ -65,6 +66,7 @@ public class StockController {
 
 		transactionService.createCryptoTransaction(response != null ? response.body() : new ForexDataDto(), ctce, userId);
 
+		// TODO: 08.08.2021 not return null!!
 		return null;
 	}
 
@@ -83,11 +85,14 @@ public class StockController {
 		AssetDataListEntity result = new AssetDataListEntity();
 
 		// process BTC data
-		buildCryptoRetrofit();
+		Retrofit cryptoRetrofit = RetrofitBuilder.buildRetrofit(ApiConfiguration.API_COINBASE_URL);
+		assetApiService = cryptoRetrofit.create(AssetApiService.class);
 		result.addAsset(processBtcData(userId));
 
 		// process shares data
-		buildSharesRetrofit();
+		Retrofit sharesRetrofit = RetrofitBuilder.buildRetrofit(ApiConfiguration.API_YAHOO_URL);
+		assetApiService = sharesRetrofit.create(AssetApiService.class);
+
 		result.assAssetDataList(processSharesAssets(userId));
 
 		return result;
@@ -133,50 +138,5 @@ public class StockController {
 		return allSharesTransactions.stream()
 				.map(CryptoTransaction::getType)
 				.collect(Collectors.toSet());
-	}
-
-	private void buildCryptoRetrofit() {
-		Gson gson = new GsonBuilder()
-				.setLenient()
-				.create();
-
-		String baseUrl = ApiConfiguration.API_COINBASE_URL;
-
-		Retrofit retrofit = new Retrofit.Builder()
-				.baseUrl(baseUrl)
-				.addConverterFactory(GsonConverterFactory.create(gson))
-				.build();
-
-		assetApiService = retrofit.create(AssetApiService.class);
-	}
-
-	private void buildSharesRetrofit() {
-		Gson gson = new GsonBuilder()
-				.setLenient()
-				.create();
-
-		String baseUrl = ApiConfiguration.API_YAHOO_URL;
-
-		Retrofit retrofit = new Retrofit.Builder()
-				.baseUrl(baseUrl)
-				.addConverterFactory(GsonConverterFactory.create(gson))
-				.build();
-
-		assetApiService = retrofit.create(AssetApiService.class);
-	}
-
-	private void buildForexRetrofit() {
-		Gson gson = new GsonBuilder()
-				.setLenient()
-				.create();
-
-		String baseUrl = ApiConfiguration.API_FOREX_URL;
-
-		Retrofit retrofit = new Retrofit.Builder()
-				.baseUrl(baseUrl)
-				.addConverterFactory(GsonConverterFactory.create(gson))
-				.build();
-
-		assetApiService = retrofit.create(AssetApiService.class);
 	}
 }

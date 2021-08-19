@@ -1,7 +1,6 @@
 package com.mystocks.service;
 
 import com.mystocks.constants.CurrencyEnum;
-import com.mystocks.controller.StockController;
 import com.mystocks.dto.*;
 import com.mystocks.enums.AssetType;
 import com.mystocks.helper.AssetDataHelper;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 @Component
 public class BtcServiceImpl implements BtcService{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BtcServiceImpl.class);
 
 	final private CryptoTransactionsRepository cryptoTransactionsRepository;
 	final private AssetDataHelper assetDataHelper;
