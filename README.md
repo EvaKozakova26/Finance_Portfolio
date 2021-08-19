@@ -19,8 +19,11 @@ Used technologies:
 
 ## Controllers
 
-### StockController
+### AssetController
 API for manipulating with assets
+
+### TransactionsController
+API for manipulating with transactions
 
 ## Services
 ### AssetApiService
