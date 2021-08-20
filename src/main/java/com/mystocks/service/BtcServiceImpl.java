@@ -106,10 +106,10 @@ public class BtcServiceImpl implements BtcService{
 		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
 		BigDecimal totalAmount = BigDecimal.ZERO;
 		if (!allByUserId.isEmpty()) {
-			totalAmount = assetDataHelper.getTotalAmount(allByUserId, "btc");
+			totalAmount = assetDataHelper.getTotal(allByUserId, "btc", CryptoTransaction::getAmount);
 		}
 
-		assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getInvestedCrowns(allByUserId, "btc")));
+		assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByUserId, "btc", CryptoTransaction::getTransactionValueInCrowns)));
 		assetData.setAssetBalance(String.valueOf(totalAmount));
 
 		List<AssetRate> btcRates = new ArrayList<>();

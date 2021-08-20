@@ -74,21 +74,22 @@ public class SharesServiceImpl implements SharesService{
 		Meta sharesMeta = shares.getMeta();
 
 		List<CryptoTransaction> allByTypeAndUserId = transactionsRepository.findAllByTypeAndUserId(sharesMeta.getSymbol(), userId);
-		BigDecimal totalAmount = assetDataHelper.getTotalAmount(allByTypeAndUserId, sharesMeta.getSymbol());
+		BigDecimal totalAmount = assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getAmount);
 
-		assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getInvestedCrowns(allByTypeAndUserId, sharesMeta.getSymbol())));
+		if (sharesMeta.getCurrency().equals(CurrencyEnum.CZK.name())) {
+			assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getTransactionValueInCrowns)));
+		} else {
+			assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getTransactionValueInDollars)));
+		}
 		assetData.setAssetBalance(String.valueOf(totalAmount));
 
 
 		List<AssetRate> shareRates = new ArrayList<>();
 
-		if (sharesMeta.getCurrency().equals(CurrencyEnum.CZK.name())) {
-			// CZK
-			AssetRate assetRateCZK = assetDataHelper.getShareBalance(shares, totalAmount, CurrencyEnum.CZK);
-			shareRates.add(assetRateCZK);
-		} else {
-			// TODO: 06.07.2021 NON-PRA markets process
-		}
+		// TODO casem rozdelit na vice currency
+		AssetRate assetRateCZK = assetDataHelper.getShareBalance(shares, totalAmount, CurrencyEnum.valueOf(sharesMeta.getCurrency()));
+		shareRates.add(assetRateCZK);
+
 
 		assetData.setAssetBalanceList(shareRates);
 		assetData.setSymbol(sharesMeta.getSymbol());

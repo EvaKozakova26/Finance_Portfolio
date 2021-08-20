@@ -10,32 +10,21 @@ import com.mystocks.model.CryptoTransaction;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.function.Function;
 
 public class AssetDataHelper {
 
-	private static final String DEFAULT_RATE = "0";
-
 	/**
-	 * sums all transactions values in crowns
+	 * sums all values defined by given function
+	 * e.g. CryptoTransaction::getTotalAmount
+	 * e.g. CryptoTransaction::getInvestedInCrowns
 	 * @param allByUserId - all transactions by specific user
 	 * @return sum
 	 */
-	public BigDecimal getInvestedCrowns(List<CryptoTransaction> allByUserId, String type) {
+	public BigDecimal getTotal(List<CryptoTransaction> allByUserId, String type, Function<CryptoTransaction, BigDecimal> function) {
 		return allByUserId.stream()
 				.filter(ct -> ct.getType().equals(type))
-				.map(CryptoTransaction::getTransactionValueInCrowns)
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-	}
-
-	/**
-	 * sums all purchased assets
-	 * @param allByUserId - all transactions by specific user
-	 * @return sum
-	 */
-	public BigDecimal getTotalAmount(List<CryptoTransaction> allByUserId, String type) {
-		return allByUserId.stream()
-				.filter(ct -> ct.getType().equals(type))
-				.map(CryptoTransaction::getAmount)
+				.map(function)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 
@@ -49,15 +38,12 @@ public class AssetDataHelper {
 	public AssetRate getBtcBalance(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) {
 		AssetRate assetRate = new AssetRate();
 		assetRate.setCurrency(currency.name());
-		String rate = btcInfoDto != null ? getBtcRateByCurrency(btcInfoDto, currency) : null;
+		String rate = getBtcRateByCurrency(btcInfoDto, currency);
 
-		String normalizedRate = DEFAULT_RATE;
-		if (rate != null) {
-			normalizedRate = normalizeRate(rate);
-			rate = rate.substring(0, rate.lastIndexOf("."));
-		}
-
+		String normalizedRate = normalizeRate(rate);
+		rate = rate.substring(0, rate.lastIndexOf("."));
 		assetRate.setPrice(rate);
+
 		assetRate.setAccBalance(String.valueOf(getFinalBalance(totalAmount, normalizedRate, AssetType.CRYPTO)));
 		return assetRate;
 	}
@@ -66,15 +52,13 @@ public class AssetDataHelper {
 	public AssetRate getShareBalance(SharesDto sharesDto, BigDecimal totalAmount, CurrencyEnum currency) {
 		AssetRate assetRate = new AssetRate();
 		assetRate.setCurrency(currency.name());
-		String rate = sharesDto != null ? getShareRateByCurrency(sharesDto, currency) : null;
 
-		String normalizedRate = DEFAULT_RATE;
-		if (rate != null) {
-			normalizedRate = normalizeRate(rate);
-		}
-
+		String rate = String.valueOf(sharesDto.getMeta().getRegularMarketPrice());
+		String normalizedRate = normalizeRate(rate);
 		assetRate.setPrice(rate);
+
 		assetRate.setAccBalance(String.valueOf(getFinalBalance(totalAmount, normalizedRate, AssetType.SHARES)));
+
 		return assetRate;
 	}
 
@@ -83,14 +67,6 @@ public class AssetDataHelper {
 			return btcInfoDto.getBpi().getUSD().getRate();
 		} else {
 			return btcInfoDto.getBpi().getCZK().getRate();
-		}
-	}
-
-	private String getShareRateByCurrency(SharesDto sharesDto, CurrencyEnum currencyEnum) {
-		if (currencyEnum == CurrencyEnum.USD) {
-			return "sharesDto.getBpi().getUSD().getRate()";
-		} else {
-			return String.valueOf(sharesDto.getChart().getResult().get(0).getMeta().getRegularMarketPrice());
 		}
 	}
 
