@@ -1,6 +1,6 @@
 # Finance portfolio app server
-Backend app for Finance portfolio app UI
-
+Backend app for Finance portfolio app UI </b>
+This app provides investing data about shares, indexes and cryptocurrencies. It is divided into several layers including feching data from open APIs to catch current price data about each asset, processing these data and providing it in form of json objects to be easily read by client application.
 ## Overview
 
 Used technologies:
@@ -12,10 +12,8 @@ Used technologies:
 ## Architecture
 ![now](https://github.com/EvaKozakova26/Finance_Portfolio/blob/master/sources/architecture.png "Now")<br/>
 
-## Summary
-
 ## API configuration
-// references to APIs
+// TODO... 
 
 ## Controllers
 
@@ -39,10 +37,10 @@ Methods using with retrofit to fetch API data
 ## Helpers
 ### AssetDataHelper
 Helper providing methods for processing asset data
- - public BigDecimal <b>getInvestedCrowns</b>(List<CryptoTransaction> allByUserId, String type) - <i>sums all transactions values in crowns</i>
- - public BigDecimal <b>getTotalAmount</b>(List<CryptoTransaction> allByUserId, String type) - <i>sums all purchased assets</i>
- - public AssetRate <b>getBtcBalance</b>(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms btc information into AssetRate object</i>
- - public AssetRate <b>getShareBalance</b>(SharesDto sharesDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms shares information into AssetRate object</i>
+ * public BigDecimal <b>getTotal</b>(List<CryptoTransaction> allByUserId, String type, Function<CryptoTransaction, BigDecimal> function) - <i>sums all values defined by given function (see example below)</i>
+   *  ```assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getTransactionValueInCrowns))```
+ * public AssetRate <b>getBtcBalance</b>(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms btc information into AssetRate object</i>
+ * public AssetRate <b>getShareBalance</b>(SharesDto sharesDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms shares information into AssetRate object</i>
   
 ## DTOs
 ### AssetData
