@@ -2,8 +2,8 @@ package com.mystocks.controller;
 
 import com.mystocks.dto.AssetDataListEntity;
 import com.mystocks.dto.CryptoTransactionListEntity;
+import com.mystocks.service.AssetService;
 import com.mystocks.service.BtcService;
-import com.mystocks.service.SharesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +18,12 @@ public class AssetController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
 
 	private final BtcService btcService;
-	private final SharesService sharesService;
+	private final AssetService assetService;
 
 	@Autowired
-	public AssetController(BtcService btcService, SharesService sharesService) {
+	public AssetController(BtcService btcService, AssetService assetService) {
 		this.btcService = btcService;
-		this.sharesService = sharesService;
+		this.assetService = assetService;
 	}
 
 	@GetMapping("/all/{userId}")
@@ -39,15 +39,7 @@ public class AssetController {
 	@CrossOrigin
 	public AssetDataListEntity getAssetsData(@PathVariable("userId") String userId) {
 		LOGGER.info("getAssetsData has started for user {}", userId);
-
-		AssetDataListEntity result = new AssetDataListEntity();
-
-		// process BTC data
-		result.addAsset(btcService.processBtcData(userId));
-
-		// process shares data
-		result.assAssetDataList(sharesService.processSharesAssets(userId));
-
+		AssetDataListEntity result = assetService.getAssetData(userId);
 		LOGGER.info("getAssetsData has ended for user {} with this size of results: {}", userId, result.getAssetData().size());
 		return result;
 	}
