@@ -19,6 +19,15 @@ Used technologies:
 
 ### AssetController
 API for manipulating with assets
+| HTTP method | url              | method name           |return type           
+|-------------|------------------|-----------------------|-------------|         
+| GET         | assets/{userId} | getAssetsData |AssetDataListEntity
+
+### PortfolioDetailController
+API for retrieving porfolio detail data
+| HTTP method | url              | method name           |return type           
+|-------------|------------------|-----------------------|-------------|         
+| GET         | /detail/{userId} | getPortfolioDetails |PortfolioDetailListEntity           
 
 ### TransactionsController
 API for manipulating with transactions
