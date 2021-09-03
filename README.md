@@ -38,6 +38,9 @@ Methods using with retrofit to fetch API data
 - Call<BtcInfoDto> <b>getBtcPriceNow();</b> - <i> - gets data about current bitcoin price</i>
 - Call<ForexDataDto> <b>getForexData(@Path(value = "date", encoded = true) String date);</b> - <i>gets data about currency value at specific date</i>
 - Call<SharesDto> <b>getSharesData(@Path(value = "code", encoded = true) String code);</b> - <i> gets data about specific shares (by its code)</i>
+### SharesService
+ - PortfolioDetailListEntity <b>getPortfolioDetail(String userId);</b><i> - processes and return portfolio detail data</i>
+ 
 ### BtcService
  // methods...
 ### SharesService
