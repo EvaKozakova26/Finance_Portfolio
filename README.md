@@ -85,16 +85,14 @@ Helper providing methods for processing asset data
 ```json
 {
    "chart": {
-    "result": [
-     	{
+    "result": [{
        "meta": {
         "currency": "CZK",
         "symbol": "CEZ.PR",
         "exchangeName": "PRA",
         "regularMarketPrice": 638.0
        },
-     }
-    ],
+     }],
    }
 }
 ```
