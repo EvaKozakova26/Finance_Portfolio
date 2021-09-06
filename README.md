@@ -71,4 +71,14 @@ Helper providing methods for processing asset data
   "investedInCrowns": "25000",
 }
 ```
+ 
+ ### PortfolioDetail
+```json
+{
+   "symbol": "BTC",
+   "fullName": "Bitcoin",
+   "sharePercentageHistoric": "27",
+   "sharePercentageCurrent": "35",
+}
+```
   
