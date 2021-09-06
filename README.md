@@ -81,4 +81,21 @@ Helper providing methods for processing asset data
    "sharePercentageCurrent": "35",
 }
 ```
+ ### SharesDto
+```json
+{
+   "chart": {
+    "result": [
+     	{
+       "meta": {
+        "currency": "CZK",
+        "symbol": "CEZ.PR",
+        "exchangeName": "PRA",
+        "regularMarketPrice": 638.0
+       },
+     }
+    ],
+   }
+}
+```
   
