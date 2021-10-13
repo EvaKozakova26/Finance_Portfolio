@@ -19,6 +19,15 @@ Used technologies:
 
 ### AssetController
 API for manipulating with assets
+| HTTP method | url              | method name           |return type           
+|-------------|------------------|-----------------------|-------------|         
+| GET         | assets/{userId} | getAssetsData |AssetDataListEntity
+
+### PortfolioDetailController
+API for retrieving porfolio detail data
+| HTTP method | url              | method name           |return type           
+|-------------|------------------|-----------------------|-------------|         
+| GET         | /detail/{userId} | getPortfolioDetails |PortfolioDetailListEntity           
 
 ### TransactionsController
 API for manipulating with transactions
@@ -29,6 +38,9 @@ Methods using with retrofit to fetch API data
 - Call<BtcInfoDto> <b>getBtcPriceNow();</b> - <i> - gets data about current bitcoin price</i>
 - Call<ForexDataDto> <b>getForexData(@Path(value = "date", encoded = true) String date);</b> - <i>gets data about currency value at specific date</i>
 - Call<SharesDto> <b>getSharesData(@Path(value = "code", encoded = true) String code);</b> - <i> gets data about specific shares (by its code)</i>
+### SharesService
+ - PortfolioDetailListEntity <b>getPortfolioDetail(String userId);</b><i> - processes and return portfolio detail data</i>
+ 
 ### BtcService
  // methods...
 ### SharesService
@@ -57,6 +69,31 @@ Helper providing methods for processing asset data
   ],
   "assetBalance": "0.002",
   "investedInCrowns": "25000",
+}
+```
+ 
+ ### PortfolioDetail
+```json
+{
+   "symbol": "BTC",
+   "fullName": "Bitcoin",
+   "sharePercentageHistoric": "27",
+   "sharePercentageCurrent": "35",
+}
+```
+ ### SharesDto
+```json
+{
+   "chart": {
+    "result": [{
+       "meta": {
+        "currency": "CZK",
+        "symbol": "CEZ.PR",
+        "exchangeName": "PRA",
+        "regularMarketPrice": 638.0
+       },
+     }],
+   }
 }
 ```
   
