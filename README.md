@@ -53,7 +53,10 @@ Helper providing methods for processing asset data
    *  ```assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getTransactionValueInCrowns))```
  * public AssetRate <b>getBtcBalance</b>(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms btc information into AssetRate object</i>
  * public AssetRate <b>getShareBalance</b>(SharesDto sharesDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms shares information into AssetRate object</i>
-  
+
+### PortfolioDetailHelper
+ * public PortfolioDetailListEntity <b>createPortfolioDetail</b>(SharesDto sharesDto, AssetDataListEntity assetData, List<CryptoTransaction> allByUserId) - <i>creates portfolio detail from given information and transforms it into PortfolioDetailListEntity object </i>
+ 
 ## DTOs
 ### AssetData
 ```json
