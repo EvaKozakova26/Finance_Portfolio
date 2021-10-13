@@ -30,6 +30,11 @@ public class PortfolioDetailHelper {
 		for (Map.Entry<String, List<CryptoTransaction>> entry : mapBySymbol.entrySet()) {
 			result.addDetail(getPortfolioDetail(allByUserId, assetData, czkToUsd, currentMarketCap, entry));
 		}
+		result.getPortfolioDetails().sort((o1, o2) -> {
+			double a = Double.parseDouble(o1.getSharePercentageCurrent());
+			double b = Double.parseDouble(o2.getSharePercentageCurrent());
+			return Double.compare(b, a);
+		});
 		return result;
 	}
 
