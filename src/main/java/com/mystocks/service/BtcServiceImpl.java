@@ -5,8 +5,8 @@ import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.dto.*;
 import com.mystocks.enums.AssetType;
 import com.mystocks.helper.AssetDataHelper;
-import com.mystocks.model.CryptoTransaction;
-import com.mystocks.repository.CryptoTransactionsRepository;
+import com.mystocks.model.Transaction;
+import com.mystocks.repository.TransactionsRepository;
 import com.mystocks.utils.MathUtils;
 import com.mystocks.utils.RetrofitBuilder;
 import org.slf4j.Logger;
@@ -32,51 +32,51 @@ public class BtcServiceImpl implements BtcService{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BtcServiceImpl.class);
 
-	final private CryptoTransactionsRepository cryptoTransactionsRepository;
+	final private TransactionsRepository transactionsRepository;
 	final private AssetDataHelper assetDataHelper;
 
 	@Autowired
-	public BtcServiceImpl(CryptoTransactionsRepository cryptoTransactionsRepository) {
-		this.cryptoTransactionsRepository = cryptoTransactionsRepository;
+	public BtcServiceImpl(TransactionsRepository transactionsRepository) {
+		this.transactionsRepository = transactionsRepository;
 		this.assetDataHelper = new AssetDataHelper();
 	}
 
 	@Override
-	public CryptoTransactionListEntity getAllTransactions(String userId) {
-		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByTypeAndUserId("btc", userId);
+	public TransactionListEntity getAllTransactions(String userId) {
+		List<Transaction> allByUserId = transactionsRepository.findAllByTypeAndUserId("btc", userId);
 
-		allByUserId.sort(Comparator.comparing(CryptoTransaction::getDate).reversed());
+		allByUserId.sort(Comparator.comparing(Transaction::getDate).reversed());
 
-		CryptoTransactionListEntity cryptoTransactionListEntity = new CryptoTransactionListEntity();
+		TransactionListEntity transactionListEntity = new TransactionListEntity();
 
 		Map<BigDecimal, BigDecimal> transactionValuesDollarsMap = allByUserId.stream()
-				.collect(Collectors.toMap(CryptoTransaction::getStockPriceInDollars, CryptoTransaction::getTransactionValueInDollars));
+				.collect(Collectors.toMap(Transaction::getStockPriceInDollars, Transaction::getTransactionValueInDollars));
 
 		Map<BigDecimal, BigDecimal> transactionValuesCrownsMap = allByUserId.stream()
-				.collect(Collectors.toMap(CryptoTransaction::getStockPriceInCrowns, CryptoTransaction::getTransactionValueInCrowns));
+				.collect(Collectors.toMap(Transaction::getStockPriceInCrowns, Transaction::getTransactionValueInCrowns));
 
-		List<CryptoTransactionDto> transactionDtos = allByUserId.stream()
+		List<TransactionDto> transactionDtos = allByUserId.stream()
 				.map(this::mapTransaction)
 				.collect(Collectors.toList());
 
-		cryptoTransactionListEntity.setCryptoTransactions(transactionDtos);
-		cryptoTransactionListEntity.setAverageTransactionValueInDollars(MathUtils.weightedAverage(transactionValuesDollarsMap));
-		cryptoTransactionListEntity.setAverageTransactionValueInCrowns(MathUtils.weightedAverage(transactionValuesCrownsMap));
+		transactionListEntity.setTransactions(transactionDtos);
+		transactionListEntity.setAverageTransactionValueInDollars(MathUtils.weightedAverage(transactionValuesDollarsMap));
+		transactionListEntity.setAverageTransactionValueInCrowns(MathUtils.weightedAverage(transactionValuesCrownsMap));
 
-		return cryptoTransactionListEntity;
+		return transactionListEntity;
 	}
 
-	private CryptoTransactionDto mapTransaction(CryptoTransaction cryptoTransaction) {
+	private TransactionDto mapTransaction(Transaction transaction) {
 		LOGGER.debug("mapping all transactions has started");
-		CryptoTransactionDto transactionDto = new CryptoTransactionDto();
-		transactionDto.setAmountBtc(cryptoTransaction.getAmount().toString());
-		transactionDto.setType(cryptoTransaction.getType());
-		transactionDto.setBuySellValue(String.valueOf(cryptoTransaction.getTransactionValueInCrowns().setScale(0, RoundingMode.HALF_UP)));
-		transactionDto.setBuySellValueInDollars(String.valueOf(cryptoTransaction.getTransactionValueInDollars().setScale(0, RoundingMode.HALF_UP)));
-		transactionDto.setStockPriceInCrowns(String.valueOf(cryptoTransaction.getStockPriceInCrowns().setScale(0, RoundingMode.HALF_UP)));
-		transactionDto.setStockPriceInDollars(String.valueOf(cryptoTransaction.getStockPriceInDollars().setScale(0, RoundingMode.HALF_UP)));
+		TransactionDto transactionDto = new TransactionDto();
+		transactionDto.setAmountBtc(transaction.getAmount().toString());
+		transactionDto.setType(transaction.getType());
+		transactionDto.setBuySellValue(String.valueOf(transaction.getTransactionValueInCrowns().setScale(0, RoundingMode.HALF_UP)));
+		transactionDto.setBuySellValueInDollars(String.valueOf(transaction.getTransactionValueInDollars().setScale(0, RoundingMode.HALF_UP)));
+		transactionDto.setStockPriceInCrowns(String.valueOf(transaction.getStockPriceInCrowns().setScale(0, RoundingMode.HALF_UP)));
+		transactionDto.setStockPriceInDollars(String.valueOf(transaction.getStockPriceInDollars().setScale(0, RoundingMode.HALF_UP)));
 		DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-		String strDate = dateFormat.format(cryptoTransaction.getDate());
+		String strDate = dateFormat.format(transaction.getDate());
 		transactionDto.setDate(strDate);
 		return transactionDto;
 	}
@@ -103,13 +103,13 @@ public class BtcServiceImpl implements BtcService{
 
 		AssetData assetData = new AssetData();
 
-		List<CryptoTransaction> allByUserId = cryptoTransactionsRepository.findAllByUserId(userId);
+		List<Transaction> allByUserId = transactionsRepository.findAllByUserId(userId);
 		BigDecimal totalAmount = BigDecimal.ZERO;
 		if (!allByUserId.isEmpty()) {
-			totalAmount = assetDataHelper.getTotal(allByUserId, "btc", CryptoTransaction::getAmount);
+			totalAmount = assetDataHelper.getTotal(allByUserId, "btc", Transaction::getAmount);
 		}
 
-		assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByUserId, "btc", CryptoTransaction::getTransactionValueInCrowns)));
+		assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByUserId, "btc", Transaction::getTransactionValueInCrowns)));
 		assetData.setAssetBalance(String.valueOf(totalAmount));
 
 		List<AssetRate> btcRates = new ArrayList<>();

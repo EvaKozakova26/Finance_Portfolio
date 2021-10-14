@@ -1,6 +1,6 @@
 package com.mystocks.dto;
 
-public class CryptoTransactionCreateEntity {
+public class TransactionCreateEntity {
 
 	String amount;
 	String transactionValue;

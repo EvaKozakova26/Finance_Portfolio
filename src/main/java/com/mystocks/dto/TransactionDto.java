@@ -1,6 +1,6 @@
 package com.mystocks.dto;
 
-public class CryptoTransactionDto {
+public class TransactionDto {
 
 	private String type;
 	private String date;

@@ -1,9 +1,9 @@
 package com.mystocks.service;
 
 import com.mystocks.configuration.ApiConfiguration;
-import com.mystocks.dto.CryptoTransactionCreateEntity;
-import com.mystocks.model.CryptoTransaction;
-import com.mystocks.repository.CryptoTransactionsRepository;
+import com.mystocks.dto.TransactionCreateEntity;
+import com.mystocks.model.Transaction;
+import com.mystocks.repository.TransactionsRepository;
 import com.mystocks.utils.RetrofitBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,16 +17,16 @@ import java.sql.Date;
 @Component
 public class TransactionServiceImpl implements TransactionService{
 
-	private final CryptoTransactionsRepository cryptoTransactionsRepository;
+	private final TransactionsRepository transactionsRepository;
 
 	@Autowired
-	public TransactionServiceImpl(CryptoTransactionsRepository cryptoTransactionsRepository) {
-		this.cryptoTransactionsRepository = cryptoTransactionsRepository;
+	public TransactionServiceImpl(TransactionsRepository transactionsRepository) {
+		this.transactionsRepository = transactionsRepository;
 	}
 
 	@Override
-	public void createCryptoTransaction(CryptoTransactionCreateEntity ctce, String userId) {
-		CryptoTransaction cryptoTransaction = new CryptoTransaction();
+	public void createTransaction(TransactionCreateEntity ctce, String userId) {
+		Transaction transaction = new Transaction();
 
 		Response<ForexDataDto> response = null;
 		AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_FOREX_URL);
@@ -42,22 +42,22 @@ public class TransactionServiceImpl implements TransactionService{
 		// todo check on null
 		ForexDataDto forexData = response != null ? response.body() : new ForexDataDto();
 
-		cryptoTransaction.setUserId(userId);
-		cryptoTransaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0,10)));
-		cryptoTransaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
-		cryptoTransaction.setAmount(new BigDecimal(ctce.getAmount()));
-		cryptoTransaction.setType(ctce.getAssetType());
+		transaction.setUserId(userId);
+		transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0,10)));
+		transaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
+		transaction.setAmount(new BigDecimal(ctce.getAmount()));
+		transaction.setType(ctce.getAssetType());
 
 		double transactionValueInDollars = Double.parseDouble(ctce.getTransactionValue()) / forexData.getRates().getCZK() * forexData.getRates().getUSD();
 
 		double stockPriceInDollars = transactionValueInDollars / Double.parseDouble(ctce.getAmount());
 		double stockPriceInCrowns = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
 
-		cryptoTransaction.setTransactionValueInDollars(BigDecimal.valueOf(transactionValueInDollars));
-		cryptoTransaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
-		cryptoTransaction.setStockPriceInDollars(BigDecimal.valueOf(stockPriceInDollars));
+		transaction.setTransactionValueInDollars(BigDecimal.valueOf(transactionValueInDollars));
+		transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
+		transaction.setStockPriceInDollars(BigDecimal.valueOf(stockPriceInDollars));
 
-		cryptoTransactionsRepository.save(cryptoTransaction);
+		transactionsRepository.save(transaction);
 
 	}
 }

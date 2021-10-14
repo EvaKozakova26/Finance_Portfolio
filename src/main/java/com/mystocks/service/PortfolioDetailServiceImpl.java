@@ -5,8 +5,8 @@ import com.mystocks.dto.AssetDataListEntity;
 import com.mystocks.dto.PortfolioDetailListEntity;
 import com.mystocks.dto.yahoo.SharesDto;
 import com.mystocks.helper.PortfolioDetailHelper;
-import com.mystocks.model.CryptoTransaction;
-import com.mystocks.repository.CryptoTransactionsRepository;
+import com.mystocks.model.Transaction;
+import com.mystocks.repository.TransactionsRepository;
 import com.mystocks.utils.RetrofitBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +25,12 @@ public class PortfolioDetailServiceImpl implements PortfolioDetailService {
 
 	public static final String USDCZK_X = "USDCZK=X";
 
-	private final CryptoTransactionsRepository transactionsRepository;
+	private final TransactionsRepository transactionsRepository;
 	private final AssetService assetService;
 	private final PortfolioDetailHelper portfolioDetailHelper;
 
 	@Autowired
-	public PortfolioDetailServiceImpl(CryptoTransactionsRepository transactionsRepository, AssetService assetService) {
+	public PortfolioDetailServiceImpl(TransactionsRepository transactionsRepository, AssetService assetService) {
 		this.transactionsRepository = transactionsRepository;
 		this.assetService = assetService;
 		this.portfolioDetailHelper = new PortfolioDetailHelper();
@@ -41,7 +41,7 @@ public class PortfolioDetailServiceImpl implements PortfolioDetailService {
 		LOGGER.info("getPortfolioDetail has started for user {}", userId);
 		PortfolioDetailListEntity result = new PortfolioDetailListEntity();
 
-		List<CryptoTransaction> allByUserId = transactionsRepository.findAllByUserId(userId);
+		List<Transaction> allByUserId = transactionsRepository.findAllByUserId(userId);
 		AssetDataListEntity assetData = assetService.getAssetData(userId);
 
 		AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_YAHOO_URL);

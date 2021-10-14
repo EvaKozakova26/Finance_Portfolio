@@ -2,20 +2,20 @@ package com.mystocks.dto;
 
 import java.util.List;
 
-public class CryptoTransactionListEntity {
+public class TransactionListEntity {
 
-	private List<CryptoTransactionDto> cryptoTransactions;
+	private List<TransactionDto> transactions;
 
 	private Double averageTransactionValueInDollars;
 
 	private Double averageTransactionValueInCrowns;
 
-	public List<CryptoTransactionDto> getCryptoTransactions() {
-		return cryptoTransactions;
+	public List<TransactionDto> getTransactions() {
+		return transactions;
 	}
 
-	public void setCryptoTransactions(List<CryptoTransactionDto> cryptoTransactions) {
-		this.cryptoTransactions = cryptoTransactions;
+	public void setTransactions(List<TransactionDto> transactionDtos) {
+		this.transactions = transactionDtos;
 	}
 
 	public Double getAverageTransactionValueInDollars() {

@@ -5,7 +5,7 @@ import com.mystocks.dto.AssetRate;
 import com.mystocks.dto.BtcInfoDto;
 import com.mystocks.dto.yahoo.SharesDto;
 import com.mystocks.enums.AssetType;
-import com.mystocks.model.CryptoTransaction;
+import com.mystocks.model.Transaction;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,12 +16,12 @@ public class AssetDataHelper {
 
 	/**
 	 * sums all values defined by given function
-	 * e.g. CryptoTransaction::getTotalAmount
-	 * e.g. CryptoTransaction::getInvestedInCrowns
+	 * e.g. Transaction::getTotalAmount
+	 * e.g. Transaction::getInvestedInCrowns
 	 * @param allByUserId - all transactions by specific user
 	 * @return sum
 	 */
-	public BigDecimal getTotal(List<CryptoTransaction> allByUserId, String type, Function<CryptoTransaction, BigDecimal> function) {
+	public BigDecimal getTotal(List<Transaction> allByUserId, String type, Function<Transaction, BigDecimal> function) {
 		return allByUserId.stream()
 				.filter(ct -> ct.getType().equals(type))
 				.map(function)

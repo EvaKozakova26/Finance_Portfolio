@@ -49,13 +49,13 @@ Methods using with retrofit to fetch API data
 ## Helpers
 ### AssetDataHelper
 Helper providing methods for processing asset data
- * public BigDecimal <b>getTotal</b>(List<CryptoTransaction> allByUserId, String type, Function<CryptoTransaction, BigDecimal> function) - <i>sums all values defined by given function (see example below)</i>
-   *  ```assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getTransactionValueInCrowns))```
+ * public BigDecimal <b>getTotal</b>(List<Transaction> allByUserId, String type, Function<Transaction, BigDecimal> function) - <i>sums all values defined by given function (see example below)</i>
+   *  ```assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), Transaction::getTransactionValueInCrowns))```
  * public AssetRate <b>getBtcBalance</b>(BtcInfoDto btcInfoDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms btc information into AssetRate object</i>
  * public AssetRate <b>getShareBalance</b>(SharesDto sharesDto, BigDecimal totalAmount, CurrencyEnum currency) - <i>transforms shares information into AssetRate object</i>
 
 ### PortfolioDetailHelper
- * public PortfolioDetailListEntity <b>createPortfolioDetail</b>(SharesDto sharesDto, AssetDataListEntity assetData, List<CryptoTransaction> allByUserId) - <i>creates portfolio detail from given information and transforms it into PortfolioDetailListEntity object </i>
+ * public PortfolioDetailListEntity <b>createPortfolioDetail</b>(SharesDto sharesDto, AssetDataListEntity assetData, List<Transaction> allByUserId) - <i>creates portfolio detail from given information and transforms it into PortfolioDetailListEntity object </i>
  
 ## DTOs
 ### AssetData

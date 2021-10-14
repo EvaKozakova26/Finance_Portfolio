@@ -1,10 +1,10 @@
 package com.mystocks.service;
 
-import com.mystocks.dto.CryptoTransactionCreateEntity;
+import com.mystocks.dto.TransactionCreateEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface TransactionService {
 
-	void createCryptoTransaction(CryptoTransactionCreateEntity ctce, String userId);
+	void createTransaction(TransactionCreateEntity ctce, String userId);
 }

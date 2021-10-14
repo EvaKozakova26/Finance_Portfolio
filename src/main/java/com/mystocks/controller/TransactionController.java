@@ -1,6 +1,6 @@
 package com.mystocks.controller;
 
-import com.mystocks.dto.CryptoTransactionCreateEntity;
+import com.mystocks.dto.TransactionCreateEntity;
 import com.mystocks.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +22,9 @@ public class TransactionController {
 
 	@PostMapping("/crypto/create/{userId}")
 	@CrossOrigin
-	public Void createCryptoTransaction(@RequestBody CryptoTransactionCreateEntity ctce, @PathVariable("userId") String userId) {
-		LOGGER.info("createCryptoTransaction has started for user {}", userId);
-		transactionService.createCryptoTransaction(ctce, userId);
+	public Void createTransaction(@RequestBody TransactionCreateEntity ctce, @PathVariable("userId") String userId) {
+		LOGGER.info("createTransaction has started for user {}", userId);
+		transactionService.createTransaction(ctce, userId);
 		// TODO: 08.08.2021 not return null!!
 		return null;
 	}

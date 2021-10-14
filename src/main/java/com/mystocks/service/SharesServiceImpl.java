@@ -8,8 +8,8 @@ import com.mystocks.dto.yahoo.Meta;
 import com.mystocks.dto.yahoo.SharesDto;
 import com.mystocks.enums.AssetType;
 import com.mystocks.helper.AssetDataHelper;
-import com.mystocks.model.CryptoTransaction;
-import com.mystocks.repository.CryptoTransactionsRepository;
+import com.mystocks.model.Transaction;
+import com.mystocks.repository.TransactionsRepository;
 import com.mystocks.utils.RetrofitBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +30,11 @@ public class SharesServiceImpl implements SharesService{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SharesServiceImpl.class);
 
-	private final CryptoTransactionsRepository transactionsRepository;
+	private final TransactionsRepository transactionsRepository;
 	final private AssetDataHelper assetDataHelper;
 
 	@Autowired
-	public SharesServiceImpl(CryptoTransactionsRepository transactionsRepository) {
+	public SharesServiceImpl(TransactionsRepository transactionsRepository) {
 		this.transactionsRepository = transactionsRepository;
 		this.assetDataHelper = new AssetDataHelper();
 	}
@@ -42,7 +42,7 @@ public class SharesServiceImpl implements SharesService{
 	@Override
 	public List<AssetData> processSharesAssets(String userId) {
 		List<AssetData> result = new ArrayList<>();
-		List<CryptoTransaction> allSharesTransactions = getAllSharesTransactions(userId);
+		List<Transaction> allSharesTransactions = getAllSharesTransactions(userId);
 		Set<String> sharesCodes = getSharesCodes(allSharesTransactions);
 
 		AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_YAHOO_URL);
@@ -73,13 +73,13 @@ public class SharesServiceImpl implements SharesService{
 		// result is always ONE - 1 day history
 		Meta sharesMeta = shares.getMeta();
 
-		List<CryptoTransaction> allByTypeAndUserId = transactionsRepository.findAllByTypeAndUserId(sharesMeta.getSymbol(), userId);
-		BigDecimal totalAmount = assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getAmount);
+		List<Transaction> allByTypeAndUserId = transactionsRepository.findAllByTypeAndUserId(sharesMeta.getSymbol(), userId);
+		BigDecimal totalAmount = assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), Transaction::getAmount);
 
 		if (sharesMeta.getCurrency().equals(CurrencyEnum.CZK.name())) {
-			assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getTransactionValueInCrowns)));
+			assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), Transaction::getTransactionValueInCrowns)));
 		} else {
-			assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), CryptoTransaction::getTransactionValueInDollars)));
+			assetData.setInvestedInCrowns(String.valueOf(assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), Transaction::getTransactionValueInDollars)));
 		}
 		assetData.setAssetBalance(String.valueOf(totalAmount));
 
@@ -96,17 +96,17 @@ public class SharesServiceImpl implements SharesService{
 		return assetData;
 	}
 
-	private List<CryptoTransaction> getAllSharesTransactions(String userId) {
-		List<CryptoTransaction> allByUserId = transactionsRepository.findAllByUserId(userId);
+	private List<Transaction> getAllSharesTransactions(String userId) {
+		List<Transaction> allByUserId = transactionsRepository.findAllByUserId(userId);
 		// TODO: 06.07.2021 je potreba prdat v DB i asset type
 		return allByUserId.stream()
 				.filter(transaction -> !transaction.getType().equals("btc"))
 				.collect(Collectors.toList());
 	}
 
-	private Set<String> getSharesCodes(List<CryptoTransaction> allSharesTransactions) {
+	private Set<String> getSharesCodes(List<Transaction> allSharesTransactions) {
 		return allSharesTransactions.stream()
-				.map(CryptoTransaction::getType)
+				.map(Transaction::getType)
 				.collect(Collectors.toSet());
 	}
 

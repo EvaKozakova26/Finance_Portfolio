@@ -1,7 +1,7 @@
 package com.mystocks.controller;
 
 import com.mystocks.dto.AssetDataListEntity;
-import com.mystocks.dto.CryptoTransactionListEntity;
+import com.mystocks.dto.TransactionListEntity;
 import com.mystocks.service.AssetService;
 import com.mystocks.service.BtcService;
 import org.slf4j.Logger;
@@ -28,10 +28,10 @@ public class AssetController {
 
 	@GetMapping("/all/{userId}")
 	@CrossOrigin
-	public CryptoTransactionListEntity getAllTransactions(@PathVariable("userId") String userId) {
+	public TransactionListEntity getAllTransactions(@PathVariable("userId") String userId) {
 		LOGGER.info("getAllTransactions has started for user {}", userId);
-		CryptoTransactionListEntity allTransactions = btcService.getAllTransactions(userId);
-		LOGGER.info("getAllTransactions has ended for user {} with this size of results: {}", userId, allTransactions.getCryptoTransactions().size());
+		TransactionListEntity allTransactions = btcService.getAllTransactions(userId);
+		LOGGER.info("getAllTransactions has ended for user {} with this size of results: {}", userId, allTransactions.getTransactions().size());
 		return allTransactions;
 	}
 

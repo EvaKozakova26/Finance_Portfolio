@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Document(collection = "crypto_transactions")
-public class CryptoTransaction {
+@Document(collection = "transactions")
+public class Transaction {
 
 	@Id
 	private String id;

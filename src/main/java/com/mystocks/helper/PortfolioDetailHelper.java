@@ -4,7 +4,7 @@ import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.dto.*;
 import com.mystocks.dto.yahoo.SharesDto;
 import com.mystocks.enums.AssetName;
-import com.mystocks.model.CryptoTransaction;
+import com.mystocks.model.Transaction;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,7 +17,7 @@ public class PortfolioDetailHelper {
 
 	public static final String BTC = "btc";
 
-	public PortfolioDetailListEntity createPortfolioDetail(SharesDto sharesDto, AssetDataListEntity assetData, List<CryptoTransaction> allByUserId) {
+	public PortfolioDetailListEntity createPortfolioDetail(SharesDto sharesDto, AssetDataListEntity assetData, List<Transaction> allByUserId) {
 		PortfolioDetailListEntity result = new PortfolioDetailListEntity();
 
 		float czkToUsd = sharesDto.getMeta().getRegularMarketPrice();
@@ -26,8 +26,8 @@ public class PortfolioDetailHelper {
 		List<AssetRate> assetRates = collectAssetRates(filteredAssets);
 
 		BigDecimal currentMarketCap = getCurrentMarketCap(assetData, czkToUsd, assetRates);
-		Map<String, List<CryptoTransaction>> mapBySymbol = getMapBySymbol(allByUserId);
-		for (Map.Entry<String, List<CryptoTransaction>> entry : mapBySymbol.entrySet()) {
+		Map<String, List<Transaction>> mapBySymbol = getMapBySymbol(allByUserId);
+		for (Map.Entry<String, List<Transaction>> entry : mapBySymbol.entrySet()) {
 			result.addDetail(getPortfolioDetail(allByUserId, assetData, czkToUsd, currentMarketCap, entry));
 		}
 		result.getPortfolioDetails().sort((o1, o2) -> {
@@ -64,7 +64,7 @@ public class PortfolioDetailHelper {
 		return resultValue;
 	}
 
-	private PortfolioDetail getPortfolioDetail(List<CryptoTransaction> allByUserId, AssetDataListEntity assetData, float czkToUsd, BigDecimal currentMarketCap, Map.Entry<String, List<CryptoTransaction>> entry) {
+	private PortfolioDetail getPortfolioDetail(List<Transaction> allByUserId, AssetDataListEntity assetData, float czkToUsd, BigDecimal currentMarketCap, Map.Entry<String, List<Transaction>> entry) {
 		AssetData assetDataForSymbol = getAssetDataForSymbol(assetData, entry);
 
 		BigDecimal currentMarketValue;
@@ -79,7 +79,7 @@ public class PortfolioDetailHelper {
 		return createPortfolioDetail(entry.getValue(), entry.getKey(), totalInvested, currentMarketCap, currentMarketValue);
 	}
 
-	private AssetData getAssetDataForSymbol(AssetDataListEntity assetData, Map.Entry<String, List<CryptoTransaction>> entry) {
+	private AssetData getAssetDataForSymbol(AssetDataListEntity assetData, Map.Entry<String, List<Transaction>> entry) {
 		Optional<AssetData> data = assetData.getAssetData().stream()
 				.filter(d -> d.getSymbol().equals(entry.getKey()))
 				.findFirst();
@@ -112,18 +112,18 @@ public class PortfolioDetailHelper {
 				.collect(Collectors.toList());
 	}
 
-	private Map<String, List<CryptoTransaction>> getMapBySymbol(List<CryptoTransaction> allByUserId) {
+	private Map<String, List<Transaction>> getMapBySymbol(List<Transaction> allByUserId) {
 		return allByUserId.stream()
-				.collect(Collectors.groupingBy(CryptoTransaction::getType));
+				.collect(Collectors.groupingBy(Transaction::getType));
 	}
 
-	private BigDecimal getTotalInvested(List<CryptoTransaction> allByUserId) {
+	private BigDecimal getTotalInvested(List<Transaction> allByUserId) {
 		return allByUserId.stream()
-				.map(CryptoTransaction::getTransactionValueInCrowns)
+				.map(Transaction::getTransactionValueInCrowns)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 
-	private PortfolioDetail createPortfolioDetail(List<CryptoTransaction> transactions, String symbol, BigDecimal totalInvested, BigDecimal currentMarketValue, BigDecimal currentMarketCap) {
+	private PortfolioDetail createPortfolioDetail(List<Transaction> transactions, String symbol, BigDecimal totalInvested, BigDecimal currentMarketValue, BigDecimal currentMarketCap) {
 		PortfolioDetail portfolioDetail = new PortfolioDetail();
 		portfolioDetail.setSymbol(symbol);
 		portfolioDetail.setFullName(AssetName.values.get(symbol));
@@ -139,8 +139,8 @@ public class PortfolioDetailHelper {
 		return String.valueOf(sharePercentage);
 	}
 
-	private String getPercentage(List<CryptoTransaction> transactions, String symbol, BigDecimal totalInvested) {
-		BigDecimal totalForSymbol = new AssetDataHelper().getTotal(transactions, symbol, CryptoTransaction::getTransactionValueInCrowns);
+	private String getPercentage(List<Transaction> transactions, String symbol, BigDecimal totalInvested) {
+		BigDecimal totalForSymbol = new AssetDataHelper().getTotal(transactions, symbol, Transaction::getTransactionValueInCrowns);
 		BigDecimal multiply = totalForSymbol.multiply(BigDecimal.valueOf(100));
 		BigDecimal sharePercentage = multiply.divide(totalInvested, RoundingMode.HALF_UP).setScale(2,RoundingMode.HALF_UP);
 		return String.valueOf(sharePercentage);
