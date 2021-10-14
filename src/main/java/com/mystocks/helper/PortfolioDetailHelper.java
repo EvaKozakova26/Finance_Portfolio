@@ -114,7 +114,7 @@ public class PortfolioDetailHelper {
 
 	private Map<String, List<Transaction>> getMapBySymbol(List<Transaction> allByUserId) {
 		return allByUserId.stream()
-				.collect(Collectors.groupingBy(Transaction::getType));
+				.collect(Collectors.groupingBy(Transaction::getCode));
 	}
 
 	private BigDecimal getTotalInvested(List<Transaction> allByUserId) {

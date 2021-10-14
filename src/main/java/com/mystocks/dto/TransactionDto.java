@@ -3,6 +3,7 @@ package com.mystocks.dto;
 public class TransactionDto {
 
 	private String type;
+	private String code;
 	private String date;
 	private String amountBtc;
 	private String buySellValue;
@@ -64,5 +65,13 @@ public class TransactionDto {
 
 	public void setStockPriceInCrowns(String stockPriceInCrowns) {
 		this.stockPriceInCrowns = stockPriceInCrowns;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 }

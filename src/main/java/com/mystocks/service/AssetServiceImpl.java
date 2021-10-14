@@ -25,7 +25,7 @@ public class AssetServiceImpl implements AssetService {
 		result.addAsset(btcService.processBtcData(userId));
 
 		// process shares data
-		result.assAssetDataList(sharesService.processSharesAssets(userId));
+		result.addAssetDataList(sharesService.processSharesAssets(userId));
 
 		return  result;
 	}

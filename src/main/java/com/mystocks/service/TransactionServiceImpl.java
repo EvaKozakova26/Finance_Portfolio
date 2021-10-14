@@ -29,21 +29,23 @@ public class TransactionServiceImpl implements TransactionService{
 	public void createTransaction(TransactionCreateEntity ctce, String userId) {
 		Transaction transaction = new Transaction();
 
+		Response<ForexDataDto> response = null;
+		AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_FOREX_URL);
+		Call<ForexDataDto> retrofitCall = assetApiService.getForexData(ctce.getTransactionDate().substring(0,10));
+
+		try {
+			response =  retrofitCall.execute();
+		} catch (IOException e) {
+			// TODO: 10.04.2021 exception mapper
+			e.printStackTrace();
+		}
+
+		// todo check on null
+		ForexDataDto forexData = response != null ? response.body() : new ForexDataDto();
+
 		if (ctce.getAssetType().equalsIgnoreCase("btc")) {
 			// TODO: 14.10.2021 musim jeste vymyslet, jak ukladat btc
-			Response<ForexDataDto> response = null;
-			AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_FOREX_URL);
-			Call<ForexDataDto> retrofitCall = assetApiService.getForexData(ctce.getTransactionDate().substring(0,10));
 
-			try {
-				response =  retrofitCall.execute();
-			} catch (IOException e) {
-				// TODO: 10.04.2021 exception mapper
-				e.printStackTrace();
-			}
-
-			// todo check on null
-			ForexDataDto forexData = response != null ? response.body() : new ForexDataDto();
 
 			transaction.setUserId(userId);
 			transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0,10)));

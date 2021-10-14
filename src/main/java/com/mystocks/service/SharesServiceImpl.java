@@ -73,7 +73,7 @@ public class SharesServiceImpl implements SharesService{
 		// result is always ONE - 1 day history
 		Meta sharesMeta = shares.getMeta();
 
-		List<Transaction> allByTypeAndUserId = transactionsRepository.findAllByTypeAndUserId(sharesMeta.getSymbol(), userId);
+		List<Transaction> allByTypeAndUserId = transactionsRepository.findAllByCodeAndUserId(sharesMeta.getSymbol(), userId);
 		BigDecimal totalAmount = assetDataHelper.getTotal(allByTypeAndUserId, sharesMeta.getSymbol(), Transaction::getAmount);
 
 		if (sharesMeta.getCurrency().equals(CurrencyEnum.CZK.name())) {
@@ -98,15 +98,14 @@ public class SharesServiceImpl implements SharesService{
 
 	private List<Transaction> getAllSharesTransactions(String userId) {
 		List<Transaction> allByUserId = transactionsRepository.findAllByUserId(userId);
-		// TODO: 06.07.2021 je potreba prdat v DB i asset type
 		return allByUserId.stream()
-				.filter(transaction -> !transaction.getType().equals("btc"))
+				.filter(transaction -> transaction.getType().equals(AssetType.SHARES.name()))
 				.collect(Collectors.toList());
 	}
 
 	private Set<String> getSharesCodes(List<Transaction> allSharesTransactions) {
 		return allSharesTransactions.stream()
-				.map(Transaction::getType)
+				.map(Transaction::getCode)
 				.collect(Collectors.toSet());
 	}
 

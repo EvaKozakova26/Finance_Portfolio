@@ -23,7 +23,7 @@ public class AssetDataHelper {
 	 */
 	public BigDecimal getTotal(List<Transaction> allByUserId, String type, Function<Transaction, BigDecimal> function) {
 		return allByUserId.stream()
-				.filter(ct -> ct.getType().equals(type))
+				.filter(ct -> ct.getCode().equals(type))
 				.map(function)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}

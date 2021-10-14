@@ -43,7 +43,7 @@ public class BtcServiceImpl implements BtcService{
 
 	@Override
 	public TransactionListEntity getAllTransactions(String userId) {
-		List<Transaction> allByUserId = transactionsRepository.findAllByTypeAndUserId("btc", userId);
+		List<Transaction> allByUserId = transactionsRepository.findAllByCodeAndUserId("btc", userId);
 
 		allByUserId.sort(Comparator.comparing(Transaction::getDate).reversed());
 
@@ -71,6 +71,7 @@ public class BtcServiceImpl implements BtcService{
 		TransactionDto transactionDto = new TransactionDto();
 		transactionDto.setAmountBtc(transaction.getAmount().toString());
 		transactionDto.setType(transaction.getType());
+		transactionDto.setCode(transaction.getCode());
 		transactionDto.setBuySellValue(String.valueOf(transaction.getTransactionValueInCrowns().setScale(0, RoundingMode.HALF_UP)));
 		transactionDto.setBuySellValueInDollars(String.valueOf(transaction.getTransactionValueInDollars().setScale(0, RoundingMode.HALF_UP)));
 		transactionDto.setStockPriceInCrowns(String.valueOf(transaction.getStockPriceInCrowns().setScale(0, RoundingMode.HALF_UP)));

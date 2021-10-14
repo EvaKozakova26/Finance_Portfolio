@@ -9,5 +9,5 @@ public interface TransactionsRepository extends MongoRepository<Transaction, Str
 
 	List<Transaction> findAllByUserId(String userId);
 
-	List<Transaction> findAllByTypeAndUserId(String type, String userId);
+	List<Transaction> findAllByCodeAndUserId(String code, String userId);
 }

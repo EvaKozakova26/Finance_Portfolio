@@ -16,6 +16,8 @@ public class Transaction {
 
 	private String type;
 
+	private String code;
+
 	private BigDecimal amount;
 
 	private Date date;
@@ -90,5 +92,13 @@ public class Transaction {
 
 	public void setTransactionValueInDollars(BigDecimal transactionValueInDollars) {
 		this.transactionValueInDollars = transactionValueInDollars;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 }
