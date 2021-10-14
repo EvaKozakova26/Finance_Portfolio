@@ -20,7 +20,7 @@ public class TransactionController {
 		this.transactionService = transactionService;
 	}
 
-	@PostMapping("/crypto/create/{userId}")
+	@PostMapping("/transaction/create/{userId}")
 	@CrossOrigin
 	public Void createTransaction(@RequestBody TransactionCreateEntity ctce, @PathVariable("userId") String userId) {
 		LOGGER.info("createTransaction has started for user {}", userId);

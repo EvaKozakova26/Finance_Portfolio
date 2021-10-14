@@ -3,6 +3,7 @@ package com.mystocks.dto;
 public class TransactionCreateEntity {
 
 	String amount;
+	String currency;
 	String transactionValue;
 	String assetType;
 	String transactionDate;
@@ -37,5 +38,13 @@ public class TransactionCreateEntity {
 
 	public void setTransactionDate(String transactionDate) {
 		this.transactionDate = transactionDate;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 }
