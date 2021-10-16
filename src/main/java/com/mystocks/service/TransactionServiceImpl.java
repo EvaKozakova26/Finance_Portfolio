@@ -5,6 +5,7 @@ import com.mystocks.constants.CurrencyEnum;
 import com.mystocks.dto.TransactionCreateEntity;
 import com.mystocks.dto.TransactionDto;
 import com.mystocks.dto.TransactionListEntity;
+import com.mystocks.enums.AssetType;
 import com.mystocks.model.Transaction;
 import com.mystocks.repository.TransactionsRepository;
 import com.mystocks.utils.RetrofitBuilder;
@@ -114,7 +115,8 @@ public class TransactionServiceImpl implements TransactionService {
 		transaction.setAmount(new BigDecimal(ctce.getAmount()));
 		transaction.setUserId(userId);
 		transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0, 10)));
-		transaction.setType(ctce.getAssetType());
+		transaction.setType(AssetType.SHARES.name());
+		transaction.setCode(ctce.getAssetType());
 
 		if (ctce.getCurrency().equals(CurrencyEnum.CZK.name())) {
 			transaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
@@ -122,10 +124,11 @@ public class TransactionServiceImpl implements TransactionService {
 			transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
 
 		} else {
-			transaction.setTransactionValueInDollars(new BigDecimal(ctce.getTransactionValue()));
+			BigDecimal trVal = new BigDecimal(ctce.getTransactionValue());
+			transaction.setTransactionValueInDollars(trVal);
 			double stockPriceInDollars = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
 			transaction.setStockPriceInDollars(BigDecimal.valueOf(stockPriceInDollars));
-			transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInDollars * 21.5)); // TODO: 14.10.2021 nasobit aktualnim kurzem, potrebuji to pok pri vytvareni detailu portfolia
+			transaction.setTransactionValueInCrowns(new BigDecimal("21.5").multiply(trVal)); // TODO: 14.10.2021 nasobit aktualnim kurzem, potrebuji to pok pri vytvareni detailu portfolia
 		}
 		return transaction;
 	}
@@ -136,7 +139,8 @@ public class TransactionServiceImpl implements TransactionService {
 		transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0, 10)));
 		transaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
 		transaction.setAmount(new BigDecimal(ctce.getAmount()));
-		transaction.setType(ctce.getAssetType());
+		transaction.setType(AssetType.CRYPTO.name());
+		transaction.setCode(ctce.getAssetType());
 
 		double transactionValueInDollars = Double.parseDouble(ctce.getTransactionValue()) / forexData.getRates().getCZK() * forexData.getRates().getUSD();
 
