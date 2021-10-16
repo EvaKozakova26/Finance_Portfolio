@@ -1,6 +1,7 @@
 package com.mystocks.controller;
 
 import com.mystocks.dto.TransactionCreateEntity;
+import com.mystocks.dto.TransactionListEntity;
 import com.mystocks.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,5 +28,12 @@ public class TransactionController {
 		transactionService.createTransaction(ctce, userId);
 		// TODO: 08.08.2021 not return null!!
 		return null;
+	}
+
+	@GetMapping("/transaction/all/{userId}")
+	@CrossOrigin
+	public TransactionListEntity getAllTransactions(@PathVariable("userId") String userId) {
+		LOGGER.info("createTransaction has started for user {}", userId);
+		return transactionService.getAllTransactions(userId);
 	}
 }

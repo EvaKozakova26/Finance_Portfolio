@@ -5,7 +5,7 @@ public class TransactionDto {
 	private String type;
 	private String code;
 	private String date;
-	private String amountBtc;
+	private String amount;
 	private String buySellValue;
 	private String buySellValueInDollars;
 	private String stockPriceInDollars;
@@ -27,12 +27,12 @@ public class TransactionDto {
 		this.date = date;
 	}
 
-	public String getAmountBtc() {
-		return amountBtc;
+	public String getAmount() {
+		return amount;
 	}
 
-	public void setAmountBtc(String amountBtc) {
-		this.amountBtc = amountBtc;
+	public void setAmount(String amount) {
+		this.amount = amount;
 	}
 
 	public String getBuySellValue() {
