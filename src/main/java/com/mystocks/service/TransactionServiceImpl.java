@@ -7,8 +7,9 @@ import com.mystocks.dto.TransactionDto;
 import com.mystocks.dto.TransactionListEntity;
 import com.mystocks.model.Transaction;
 import com.mystocks.repository.TransactionsRepository;
-import com.mystocks.utils.MathUtils;
 import com.mystocks.utils.RetrofitBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import retrofit2.Call;
@@ -22,11 +23,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class TransactionServiceImpl implements TransactionService{
+public class TransactionServiceImpl implements TransactionService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
 	private final TransactionsRepository transactionsRepository;
 
@@ -37,31 +39,26 @@ public class TransactionServiceImpl implements TransactionService{
 
 	@Override
 	public TransactionListEntity getAllTransactions(String userId) {
+
 		List<Transaction> allByUserId = transactionsRepository.findAllByUserId(userId);
 
 		allByUserId.sort(Comparator.comparing(Transaction::getDate).reversed());
 
 		TransactionListEntity transactionListEntity = new TransactionListEntity();
+		List<TransactionDto> transactionDtos = getMappedTransactions(allByUserId);
+		transactionListEntity.setTransactions(transactionDtos);
+		// to be deleted
+		transactionListEntity.setAverageTransactionValueInDollars(0.0);
+		transactionListEntity.setAverageTransactionValueInCrowns(0.0);
 
-		List<Transaction> usdTransactions = allByUserId.stream()
-				.filter(transaction -> !transaction.getTransactionValueInDollars().equals(BigDecimal.ZERO))
-				.collect(Collectors.toList());
+		LOGGER.info("getAllTransactions has ended with result size: {}", transactionListEntity.getTransactions().size());
+		return transactionListEntity;
+	}
 
-		Map<BigDecimal, BigDecimal> transactionValuesDollarsMap = usdTransactions.stream()
-				.collect(Collectors.toMap(Transaction::getStockPriceInDollars, Transaction::getTransactionValueInDollars));
-
-		Map<BigDecimal, BigDecimal> transactionValuesCrownsMap = allByUserId.stream()
-				.collect(Collectors.toMap(Transaction::getStockPriceInCrowns, Transaction::getTransactionValueInCrowns));
-
-		List<TransactionDto> transactionDtos = allByUserId.stream()
+	private List<TransactionDto> getMappedTransactions(List<Transaction> allByUserId) {
+		return allByUserId.stream()
 				.map(this::mapTransaction)
 				.collect(Collectors.toList());
-
-		transactionListEntity.setTransactions(transactionDtos);
-		transactionListEntity.setAverageTransactionValueInDollars(MathUtils.weightedAverage(transactionValuesDollarsMap));
-		transactionListEntity.setAverageTransactionValueInCrowns(MathUtils.weightedAverage(transactionValuesCrownsMap));
-
-		return transactionListEntity;
 	}
 
 	private TransactionDto mapTransaction(Transaction transaction) {
@@ -81,59 +78,74 @@ public class TransactionServiceImpl implements TransactionService{
 
 	@Override
 	public void createTransaction(TransactionCreateEntity ctce, String userId) {
-		Transaction transaction = new Transaction();
-
 		Response<ForexDataDto> response = null;
 		AssetApiService assetApiService = RetrofitBuilder.assetApiService(ApiConfiguration.API_FOREX_URL);
-		Call<ForexDataDto> retrofitCall = assetApiService.getForexData(ctce.getTransactionDate().substring(0,10));
+		Call<ForexDataDto> retrofitCall = assetApiService.getForexData(ctce.getTransactionDate().substring(0, 10));
 
 		try {
-			response =  retrofitCall.execute();
+			response = retrofitCall.execute();
 		} catch (IOException e) {
 			// TODO: 10.04.2021 exception mapper
 			e.printStackTrace();
 		}
 
-		// todo check on null
 		ForexDataDto forexData = response != null ? response.body() : new ForexDataDto();
+		Transaction transaction = new Transaction();
 
+		LOGGER.info("creating transaction data");
 		if (ctce.getAssetType().equalsIgnoreCase("btc")) {
-			// TODO: 14.10.2021 musim jeste vymyslet, jak ukladat btc
-
-
-			transaction.setUserId(userId);
-			transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0,10)));
-			transaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
-			transaction.setAmount(new BigDecimal(ctce.getAmount()));
-			transaction.setType(ctce.getAssetType());
-
-			double transactionValueInDollars = Double.parseDouble(ctce.getTransactionValue()) / forexData.getRates().getCZK() * forexData.getRates().getUSD();
-
-			double stockPriceInDollars = transactionValueInDollars / Double.parseDouble(ctce.getAmount());
-			double stockPriceInCrowns = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
-
-			transaction.setTransactionValueInDollars(BigDecimal.valueOf(transactionValueInDollars));
-			transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
-			transaction.setStockPriceInDollars(BigDecimal.valueOf(stockPriceInDollars));
-		} else {
-			transaction.setAmount(new BigDecimal(ctce.getAmount()));
-			transaction.setUserId(userId);
-			transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0,10)));
-			transaction.setType(ctce.getAssetType());
-
-			if (ctce.getCurrency().equals(CurrencyEnum.CZK.name())) {
-				transaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
-				double stockPriceInCrowns = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
-				transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
-
+			if (forexData != null) {
+				// TODO: 14.10.2021 musim jeste vymyslet, jak ukladat btc
+				transaction = createTransactionDataBtc(ctce, userId, forexData);
 			} else {
-				transaction.setTransactionValueInDollars(new BigDecimal(ctce.getTransactionValue()));
-				double stockPriceInDollars = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
-				transaction.setStockPriceInDollars(BigDecimal.valueOf(stockPriceInDollars));
-				transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInDollars * 21.5)); // TODO: 14.10.2021 nasobit aktualnim kurzem, potrebuji to pok pri vytvareni detailu portfolia
+				LOGGER.error("Cannot find UDS rate on Forex API, transaction for BTC could not be saved");
 			}
-
+		} else {
+			transaction = createTransactionShares(ctce, userId);
 		}
-		transactionsRepository.save(transaction);
+
+
+		Transaction savedTr = transactionsRepository.save(transaction);
+		LOGGER.info("Transaction has been saved, id: {}", savedTr.getId());
+	}
+
+	private Transaction createTransactionShares(TransactionCreateEntity ctce, String userId) {
+		Transaction transaction = new Transaction();
+		transaction.setAmount(new BigDecimal(ctce.getAmount()));
+		transaction.setUserId(userId);
+		transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0, 10)));
+		transaction.setType(ctce.getAssetType());
+
+		if (ctce.getCurrency().equals(CurrencyEnum.CZK.name())) {
+			transaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
+			double stockPriceInCrowns = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
+			transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
+
+		} else {
+			transaction.setTransactionValueInDollars(new BigDecimal(ctce.getTransactionValue()));
+			double stockPriceInDollars = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
+			transaction.setStockPriceInDollars(BigDecimal.valueOf(stockPriceInDollars));
+			transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInDollars * 21.5)); // TODO: 14.10.2021 nasobit aktualnim kurzem, potrebuji to pok pri vytvareni detailu portfolia
+		}
+		return transaction;
+	}
+
+	private Transaction createTransactionDataBtc(TransactionCreateEntity ctce, String userId, ForexDataDto forexData) {
+		Transaction transaction = new Transaction();
+		transaction.setUserId(userId);
+		transaction.setDate(Date.valueOf(ctce.getTransactionDate().substring(0, 10)));
+		transaction.setTransactionValueInCrowns(new BigDecimal(ctce.getTransactionValue()));
+		transaction.setAmount(new BigDecimal(ctce.getAmount()));
+		transaction.setType(ctce.getAssetType());
+
+		double transactionValueInDollars = Double.parseDouble(ctce.getTransactionValue()) / forexData.getRates().getCZK() * forexData.getRates().getUSD();
+
+		double stockPriceInDollars = transactionValueInDollars / Double.parseDouble(ctce.getAmount());
+		double stockPriceInCrowns = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
+
+		transaction.setTransactionValueInDollars(BigDecimal.valueOf(transactionValueInDollars));
+		transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
+		transaction.setStockPriceInDollars(BigDecimal.valueOf(stockPriceInDollars));
+		return transaction;
 	}
 }
