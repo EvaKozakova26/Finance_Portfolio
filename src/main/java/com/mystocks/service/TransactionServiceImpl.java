@@ -123,6 +123,8 @@ public class TransactionServiceImpl implements TransactionService {
 			double stockPriceInCrowns = Double.parseDouble(ctce.getTransactionValue()) / Double.parseDouble(ctce.getAmount());
 			transaction.setStockPriceInCrowns(BigDecimal.valueOf(stockPriceInCrowns));
 
+			// TODO asset name musim vytvorit v databazi a uikladat si je tam a brat is ije odtutd..
+
 		} else {
 			BigDecimal trVal = new BigDecimal(ctce.getTransactionValue());
 			transaction.setTransactionValueInDollars(trVal);

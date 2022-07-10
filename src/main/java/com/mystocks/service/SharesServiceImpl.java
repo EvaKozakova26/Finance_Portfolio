@@ -99,7 +99,7 @@ public class SharesServiceImpl implements SharesService{
 	private List<Transaction> getAllSharesTransactions(String userId) {
 		List<Transaction> allByUserId = transactionsRepository.findAllByUserId(userId);
 		return allByUserId.stream()
-				.filter(transaction -> transaction.getType().equals(AssetType.SHARES.name()))
+				.filter(transaction -> transaction.getType().equals(AssetType.SHARES.name().toLowerCase()))
 				.collect(Collectors.toList());
 	}
 
